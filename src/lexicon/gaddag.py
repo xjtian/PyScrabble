@@ -4,6 +4,10 @@ from settings.lexicon import WORDLIST_PATH, GADDAG_PICKLE_PATH
 import cPickle as Pickle
 
 class GaddagState(object):
+    """
+    A state (node) in a GADDAG. Each state contains a letter set (the set of letters which, if encountered next, make a
+    word) and the arcs leading out of it and their corresponding letters.
+    """
     def __init__(self):
         self.arcs = dict()
         self.letter_set = set()
@@ -44,21 +48,27 @@ class GaddagState(object):
                 raise Exception('Arc for forced character already exists.')
 
         self.arcs[char] = forced_state
-        return
 
 class Gaddag(object):
+    """
+    A partially-minimized GADDAG structure to represent a lexicon as described in Steven Gordon's 1994 paper 'A Faster
+    Scrabble Move Generation Algorithm'.
+    """
     def __init__(self):
         self.root = GaddagState()
 
     def add_word(self, word):
+        """
+        Add a word to the GADDAG and partially minimize the resulting structure.
+        """
         n = len(word)
 
-        state = self.root   #create path for n...0
+        state = self.root   #create path for n...1
         for i in xrange(n-1, 1, -1):
             state = state.add_arc(word[i])
         state.add_final_arc(word[1], word[0])
 
-        state = self.root   #create path for n-1...0|n
+        state = self.root   #create path for n-1...1|n
         for i in xrange(n-2, -1, -1):
             state = state.add_arc(word[i])
         state = state.add_final_arc('|', word[-1])
@@ -71,9 +81,26 @@ class Gaddag(object):
             state = state.add_arc('|')
             state.force_arc(word[m+1], forced_state)
 
+    def is_word(self, word):
+        """
+        Determines if the given word is in the lexicon represented by the GADDAG. Returns True if the word exists, False
+        otherwise.
+        """
+        cur_state = self.root
+        for letter in word[:0:-1]:
+            if not letter in cur_state.arcs: return False
+            cur_state = cur_state.arcs[letter]
+
+        return word[0] in cur_state.letter_set
+
 gaddag = Gaddag()
 
 def gaddag_from_file():
+    """
+    Create a GADDAG from a text file of a lexicon given by the WORDLIST_PATH setting. The text file should only have the
+    words in the lexicon, one per line, with a blank line at the very end. The created GADDAG will be in the 'gaddag'
+    module variable.
+    """
     global gaddag
     try:
         with open(WORDLIST_PATH, 'r') as f:
@@ -82,6 +109,9 @@ def gaddag_from_file():
     except IOError: pass
 
 def unpickle_gaddag():
+    """
+    Unpickle a GADDAG from the GADDAG_PICKLE_PATH setting. The unpickled GADDAG will be in the 'gaddag' module variable.
+    """
     global gaddag
     try:
         with open(GADDAG_PICKLE_PATH, 'r') as f:
