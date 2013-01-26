@@ -47,11 +47,18 @@ class ScrabbleGame(object):
             return False
 
         self.candidate.horizontal = horizontal
-        for i, letter in enumerate(from_rack):
+        x, y = pos
+        j = 0
+        for letter in from_rack:
             if horizontal:
-                self.candidate.add_letter(letter, (pos[0] + i, pos[1]))
+                while self.board[x][y+j] not in board.empty_locations:
+                    j += 1
+                self.candidate.add_letter(letter, (x, y+j))
             else:
-                self.candidate.add_letter(letter, (pos[0], pos[1] + i))
+                while self.board[x+j][y] not in board.empty_locations:
+                    j += 1
+                self.candidate.add_letter(letter, (x+j, y))
+            j += 1
 
         self.candidate.sort_letters()
         return True
@@ -60,6 +67,7 @@ class ScrabbleGame(object):
         if not self.candidate.positions:
             return False
 
+        #Verify the candidate is all horizontal or all vertical
         if self.candidate.horizontal:
             if not all([b.pos[0] == self.candidate.positions[0].pos[0] for b in self.candidate.positions]):
                 return False
@@ -67,35 +75,65 @@ class ScrabbleGame(object):
             if not all([b.pos[1] == self.candidate.positions[0].pos[1] for b in self.candidate.positions]):
                 return False
 
+        hooked = not self.history   #If it's the first turn, no need to hook for valid moves
+
         word_multiplier = 1
+        lx, ly = self.candidate.positions[0].pos
         for bpos in self.candidate.positions:
             x, y = bpos.pos
             if self.board[x][y] not in board.empty_locations:
                 return False
 
+            #If tiles got skipped in letter placement, make sure they contain existing letters and add them to the score
+            if self.candidate.horizontal and y - ly > 1:
+                hooked = True
+                for i in xrange(ly + 1, y):
+                    existing = self.board[x][i]
+                    if existing in board.empty_locations:
+                        return False
+                    self.candidate.score += letters.letter_scores.get(existing, 0)
+            elif not self.candidate.horizontal and x - lx > 1:
+                hooked = True
+                for i in xrange(lx + 1, x):
+                    existing = self.board[i][y]
+                    if existing in board.empty_locations:
+                        return False
+                    self.candidate.score += letters.letter_scores.get(existing, 0)
+
+            #Process multipliers for placed letter and add to score of candidate
             word_multiplier *= board.word_multipliers.get(self.board[x][y], 1)
             letter_multiplier = board.letter_multipliers.get(self.board[x][y], 1)
             self.candidate.score += letters.letter_scores.get(bpos.letter, 0) * letter_multiplier
 
             self.board[x][y] = bpos.letter
+            lx, ly = x, y
 
         prefix = self.__get_prefix(self.candidate.positions[0].pos, self.candidate.horizontal)
         suffix = self.__get_suffix(self.candidate.positions[-1].pos, self.candidate.horizontal)
 
+        hooked |= prefix or suffix  #Bridging also counts as hooking
+
+        #Add prefix and suffix to candidate score, then multiply the whole thing by the word multiplier
         for l in prefix:
             self.candidate.score += letters.letter_scores.get(l, 0)
         for l in suffix:
             self.candidate.score += letters.letter_scores.get(l, 0)
         self.candidate.score *= word_multiplier
 
-        body = ''.join([bp.letter for bp in self.candidate.positions])
+        x, y = self.candidate.positions[0].pos
+        lx, ly = self.candidate.positions[-1].pos
+
+        #Construct the word that makes up the play
+        if self.candidate.horizontal:
+            body = ''.join([self.board[x][y+i] for i in xrange(0, ly-y)])
+        else:
+            body = ''.join([self.board[x+i][y] for i in xrange(0, lx-x)])
         word = '%s%s%s' % (prefix, body, suffix)
 
         if word.upper() not in lexicon_set.global_set:
             return False
 
-        return self.__check_crosses()
-
+        return self.__check_crosses() and hooked
 
     def remove_candidate(self):
         for bpos in self.candidate.positions:
@@ -163,6 +201,7 @@ class ScrabbleGame(object):
         if not self.history:    #First turn, no crosses possible
             return True
 
+        crosses = False
         for bpos in self.candidate.positions:
             x, y = bpos.pos
             prefix = self.__get_prefix(bpos.pos, not self.candidate.horizontal)
@@ -173,6 +212,7 @@ class ScrabbleGame(object):
                 if cross.upper() not in lexicon_set.global_set:
                     return False
                 else:
+                    crosses = True
                     subscore = 0
                     for l in prefix:
                         subscore += letters.letter_scores.get(l, 0)
@@ -185,4 +225,4 @@ class ScrabbleGame(object):
 
                     self.candidate.score += subscore
 
-        return True
+        return crosses
