@@ -23,6 +23,7 @@ class ScrabbleGame(object):
         self.bag = copy.deepcopy(letters.default_bag)
 
         self.players = []
+
         self.current_turn = 0
 
         self.history = None
@@ -42,6 +43,14 @@ class ScrabbleGame(object):
         lexicon_set.read_lexicon(WORDLIST_PATH)
 
     def set_candidate(self, letters, pos, horizontal):
+        """
+        Shortcut for setting the candidate move.
+
+        @param letters: string or list of letters to play
+        @param pos: x,y position of the first tile of the play
+        @param horizontal: True if the play is horizontal, False otherwise
+        @return: True if function succeeds, False otherwise.
+        """
         from_rack = self.players[self.current_turn].valid_play(letters)
         if not from_rack:
             return False
@@ -60,12 +69,18 @@ class ScrabbleGame(object):
                 self.candidate.add_letter(letter, (x+j, y))
             j += 1
 
-        self.candidate.sort_letters()
         return True
 
     def validate_candidate(self):
+        """
+        Validate the candidate move and score it. May assign a score to an invalid move.
+
+        @return: True if the move is valid, False if it is invalid.
+        """
         if not self.candidate.positions:
             return False
+
+        self.candidate.sort_letters()
 
         #Verify the candidate is all horizontal or all vertical
         if self.candidate.horizontal:
@@ -136,22 +151,34 @@ class ScrabbleGame(object):
         return self.__check_crosses() and hooked
 
     def remove_candidate(self):
+        """
+        Remove the current candidate move.
+        """
         for bpos in self.candidate.positions:
             x, y = bpos.pos
             self.board[x][y] = board.default_board[x][y]
 
-        #TODO: finish logic in here
+        self.candidate = None
 
     def commit_candidate(self):
+        """
+        Commit the candidate move. This updates scores, draws new tiles for the player, ends the turn, and adds a new
+        state to the game tree.
+        """
         self.players[self.current_turn].use_letters(''.join([bp.letter for bp in self.candidate.positions]))
+        self.candidate.drawn = [self.bag.pop(random.randint(0, len(self.bag) - 1))
+                                for _ in xrange(0, len(self.candidate.positions))]
+        for letter in self.candidate.drawn:
+            self.players[self.current_turn].rack.append(letter)
+        self.players[self.current_turn].score += self.candidate.score
 
         newstate = StateNode(self.candidate)
         newstate.action = MoveTypes.Placed
         newstate.previous = self.history
 
         self.history = newstate
-
-        #TODO: draw new tiles from bag and write that action to history as well
+        self.current_turn += 1
+        self.current_turn %= len(self.players)
 
     def __get_prefix(self, pos, horizontal):
         """
