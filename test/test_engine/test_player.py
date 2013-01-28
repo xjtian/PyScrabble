@@ -8,8 +8,8 @@ class TestPlayer(unittest.TestCase):
         self.player = Player('player')
 
     def test_constructor(self):
-        self.assertEquals('player', self.player.name)
-        self.assertEquals(0, self.player.score)
+        self.assertEqual('player', self.player.name)
+        self.assertEqual(0, self.player.score)
         self.assert_(not self.player.rack)
 
     def test_valid_play(self):
@@ -42,9 +42,9 @@ class TestPlayer(unittest.TestCase):
         self.player.rack = list('DEADBEEF')
 
         self.player.use_letters('DEAD')
-        self.assertEquals(list('BEEF'), self.player.rack)
+        self.assertEqual(list('BEEF'), self.player.rack)
 
         self.player.rack = list('HELLO WORLD')
 
         self.player.use_letters('JELLO')
-        self.assertEquals(list('HWORLD'), self.player.rack)
+        self.assertEqual(list('HWORLD'), self.player.rack)
