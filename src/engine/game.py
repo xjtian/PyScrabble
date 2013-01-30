@@ -91,6 +91,12 @@ class ScrabbleGame(object):
                 return False
 
         hooked = not self.history   #If it's the first turn, no need to hook for valid moves
+        if hooked:
+            for bp in self.candidate.positions:
+                if bp.pos == (7, 7):
+                    break
+        else:
+            return False    #First turn but move doesn't cover middle square
 
         word_multiplier = 1
         lx, ly = self.candidate.positions[0].pos
