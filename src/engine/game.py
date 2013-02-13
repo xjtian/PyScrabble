@@ -30,7 +30,9 @@ class ScrabbleGame(object):
         self.current_turn = 0
 
         self.history = None
-        self.candidate = move.Move()
+        self.candidate = None
+
+        lexicon_set.read_lexicon(WORDLIST_PATH)
 
     def add_player(self, name):
         if len(self.players) > 3:
@@ -43,21 +45,25 @@ class ScrabbleGame(object):
         for i in xrange(0, 7 * n):
             self.players[i % n].rack.append(self.bag.pop(random.randint(0, len(self.bag) - 1)))
 
-        lexicon_set.read_lexicon(WORDLIST_PATH)
-
     def set_candidate(self, letters, pos, horizontal):
         """
-        Shortcut for setting the candidate move.
+        Shortcut for setting the candidate move. Specify the letters (in order) to play, the position of the first
+        letter, and the direction of the move and this method will place the letters sequentially in the correct
+        positions, accounting properly for any existing tiles on the board that have to be skipped.
 
-        @param letters: string or list of letters to play
-        @param pos: x,y position of the first tile of the play
-        @param horizontal: True if the play is horizontal, False otherwise
-        @return: True if function succeeds, False otherwise.
+        @param letters: string or list of letters to play.
+        @param pos: x,y position of the first tile of the play.
+        @param horizontal: True if the play is horizontal, False otherwise.
+        @return: True if function succeeds, False if any letters aren't in player's rack, there's already a candidate,
+        or the move goes out of the board.
         """
         from_rack = self.players[self.current_turn].valid_play(letters)
-        if not from_rack:
+        b_height, b_width = len(self.board), len(self.board[0])
+        if self.candidate or not letters or (pos[0] < 0 or pos[0] >= b_height) or \
+                (pos[1] < 0 or pos[1] >= b_width) or not from_rack:
             return False
 
+        self.candidate = move.Move()
         self.candidate.horizontal = horizontal
         x, y = pos
         j = 0
@@ -65,18 +71,25 @@ class ScrabbleGame(object):
             if horizontal:
                 while self.board[x][y + j] not in board.empty_locations:
                     j += 1
+                    if y + j >= b_width:
+                        return False     # Move goes out of the board
                 self.candidate.add_letter(letter, (x, y + j))
             else:
                 while self.board[x + j][y] not in board.empty_locations:
                     j += 1
+                    if x + j >= b_height:
+                        return False    # Move goes out of the board
                 self.candidate.add_letter(letter, (x + j, y))
             j += 1
+            # Check bounds
+            if (horizontal and y + j >= b_width) or (not horizontal and x + j >= b_height):
+                return False
 
         return True
 
     def validate_candidate(self):
         """
-        Validate the candidate move and score it. May assign a score to an invalid move.
+        Validate the candidate move and score it. May assign a partial score to an invalid move.
 
         @return: True if the move is valid, False if it is invalid.
         """
@@ -91,6 +104,11 @@ class ScrabbleGame(object):
                 return False
         else:
             if not all([b.pos[1] == self.candidate.positions[0].pos[1] for b in self.candidate.positions]):
+                return False
+
+        # Make sure all letters are placed in-bounds
+        for bp in self.candidate.positions:
+            if bp.pos[0] < 0 or bp.pos[0] > len(self.board) or bp.pos[1] < 0 or bp.pos[1] > len(self.board[0]):
                 return False
 
         hooked = not self.history   # If it's the first turn, no need to hook for valid moves
@@ -108,7 +126,7 @@ class ScrabbleGame(object):
             if self.board[x][y] not in board.empty_locations:
                 return False
 
-            # If tiles got skipped in letter placement, make sure they contain existing letters and add them to the score
+            # If tiles got skipped in letter placement, make sure they contain letters and add them to the score
             if self.candidate.horizontal and y - ly > 1:
                 hooked = True
                 for i in xrange(ly + 1, y):
@@ -135,7 +153,7 @@ class ScrabbleGame(object):
         prefix = self.__get_prefix(self.candidate.positions[0].pos, self.candidate.horizontal)
         suffix = self.__get_suffix(self.candidate.positions[-1].pos, self.candidate.horizontal)
 
-        hooked |= prefix or suffix  # Bridging also counts as hooking
+        hooked |= bool(prefix) or bool(suffix)  # Bridging also counts as hooking
 
         # Add prefix and suffix to candidate score, then multiply the whole thing by the word multiplier
         for l in prefix:
@@ -188,6 +206,8 @@ class ScrabbleGame(object):
         self.history = newstate
         self.current_turn += 1
         self.current_turn %= len(self.players)
+
+        self.candidate = None
 
     def __get_prefix(self, pos, horizontal):
         """
