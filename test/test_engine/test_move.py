@@ -3,6 +3,7 @@ __author__ = 'Jacky'
 import unittest
 from engine.move import Move
 
+
 class TestMove(unittest.TestCase):
     def test_constructor(self):
         m = Move()
@@ -31,7 +32,7 @@ class TestMove(unittest.TestCase):
         m.sort_letters()
 
         self.assertEqual('b', m.positions[0].letter)
-        self.assertEqual((0,0), m.positions[0].pos)
+        self.assertEqual((0, 0), m.positions[0].pos)
 
         self.assertEqual('a', m.positions[1].letter)
         self.assertEqual((0, 1), m.positions[1].pos)

@@ -2,6 +2,7 @@ __author__ = 'Jacky'
 
 from engine.board import BoardPosition
 
+
 class Move(object):
     def __init__(self):
         self.positions = []

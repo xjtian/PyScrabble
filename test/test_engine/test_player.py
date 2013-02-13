@@ -3,6 +3,7 @@ __author__ = 'Jacky'
 import unittest
 from engine.player import Player
 
+
 class TestPlayer(unittest.TestCase):
     def setUp(self):
         self.player = Player('player')
@@ -26,14 +27,14 @@ class TestPlayer(unittest.TestCase):
         l = self.player.valid_play('BLAH')
         self.assert_(not l)
 
-        #With blanks now
+        # With blanks now
         self.player.rack = list('HELLO WORLD')
 
         l = self.player.valid_play('HELLOS')
         for letter in 'HELLOs':
             self.assertIn(letter, l)
 
-        #Make sure the blank isn't used unless absolutely necessary
+        # Make sure the blank isn't used unless absolutely necessary
         l = self.player.valid_play('HELLO')
         for letter in 'HELLO':
             self.assertIn(letter, l)

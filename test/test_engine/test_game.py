@@ -6,6 +6,7 @@ from engine.game import ScrabbleGame
 
 from engine.letters import default_bag
 
+
 class TestScrabbleGame(unittest.TestCase):
     def setUp(self):
         self.game = ScrabbleGame()

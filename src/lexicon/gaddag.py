@@ -3,11 +3,13 @@ __author__ = 'Jacky'
 from settings.lexicon import WORDLIST_PATH, GADDAG_PICKLE_PATH
 import cPickle as Pickle
 
+
 class GaddagState(object):
     """
     A state (node) in a GADDAG. Each state contains a letter set (the set of letters which, if encountered next, make a
     word) and the arcs leading out of it and their corresponding letters.
     """
+
     def __init__(self):
         self.arcs = dict()
         self.letter_set = set()
@@ -49,11 +51,13 @@ class GaddagState(object):
 
         self.arcs[char] = forced_state
 
+
 class Gaddag(object):
     """
     A partially-minimized GADDAG structure to represent a lexicon as described in Steven Gordon's 1994 paper 'A Faster
     Scrabble Move Generation Algorithm'.
     """
+
     def __init__(self):
         self.root = GaddagState()
 
@@ -63,23 +67,23 @@ class Gaddag(object):
         """
         n = len(word)
 
-        state = self.root   #create path for n...1
-        for i in xrange(n-1, 1, -1):
+        state = self.root   # create path for n...1
+        for i in xrange(n - 1, 1, -1):
             state = state.add_arc(word[i])
         state.add_final_arc(word[1], word[0])
 
-        state = self.root   #create path for n-1...1|n
-        for i in xrange(n-2, -1, -1):
+        state = self.root   # create path for n-1...1|n
+        for i in xrange(n - 2, -1, -1):
             state = state.add_arc(word[i])
         state = state.add_final_arc('|', word[-1])
 
-        for m in xrange(n-3, -1, -1):   #partially minimize the remaining paths
+        for m in xrange(n - 3, -1, -1):   # partially minimize the remaining paths
             forced_state = state
             state = self.root
             for i in xrange(m, -1, -1):
                 state = state.add_arc(word[i])
             state = state.add_arc('|')
-            state.force_arc(word[m+1], forced_state)
+            state.force_arc(word[m + 1], forced_state)
 
     def is_word(self, word):
         """
@@ -93,7 +97,9 @@ class Gaddag(object):
 
         return word[0] in cur_state.letter_set
 
+
 gaddag = Gaddag()
+
 
 def gaddag_from_file():
     """
@@ -105,8 +111,10 @@ def gaddag_from_file():
     try:
         with open(WORDLIST_PATH, 'r') as f:
             for word in f.readlines():
-                gaddag.add_word(word[:-1])  #Chop the newline
-    except IOError: pass
+                gaddag.add_word(word[:-1])  # Chop the newline
+    except IOError:
+        pass
+
 
 def unpickle_gaddag():
     """
@@ -116,4 +124,5 @@ def unpickle_gaddag():
     try:
         with open(GADDAG_PICKLE_PATH, 'r') as f:
             gaddag = Pickle.load(f)
-    except IOError: pass
+    except IOError:
+        pass

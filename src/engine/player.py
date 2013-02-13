@@ -1,5 +1,6 @@
 __author__ = 'Jacky'
 
+
 class Player(object):
     def __init__(self, name):
         self.name = name
@@ -15,7 +16,7 @@ class Player(object):
             if letter not in self.rack:
                 if blank_count:
                     blank_count -= 1
-                    llist[i] = llist[i].lower() #Use a blank
+                    llist[i] = llist[i].lower()     # Use a blank
                 else:
                     return []
 
