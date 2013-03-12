@@ -115,3 +115,61 @@ class TestScrabbleGame(unittest.TestCase):
         self.game.set_candidate(hello, (7, 7), False)
         self.game.validate_candidate()
         self.assertEqual(18, self.game.candidate.score)
+
+        # With 'HELLO' placed vertically down from start square, try some crosses
+        self.game.history = object()    # Just so game.history is not None
+
+        self.game.candidate = None
+        self.game.set_candidate('ELLO', (7, 8), True)
+        self.assert_(self.game.validate_candidate())
+        self.assertEqual(9, self.game.candidate.score)
+
+        self.game.candidate = None
+        self.game.set_candidate('HELO', (9, 5), True)
+        self.assert_(self.game.validate_candidate())
+        self.assertEqual(18, self.game.candidate.score)
+
+        self.game.candidate = None
+        self.game.set_candidate('HELL', (11, 3), True)
+        self.assert_(self.game.validate_candidate())
+        self.assertEqual(16, self.game.candidate.score)
+
+        # Now try a parallel move
+        clear_game()
+        self.game.history = None
+
+        self.game.set_candidate(hello, (7, 7), False)
+        self.game.validate_candidate()
+
+        self.game.history = object()
+        self.game.candidate = None
+        self.game.set_candidate('EL', (7, 8), False)    # Forms EL, HE, and EL
+        self.assert_(self.game.validate_candidate())
+        self.assertEqual(11, self.game.candidate.score)
+
+        # TODO: Tests for blank tiles (scoring and validating)
+
+        # Try an invalid first move
+        clear_game()
+        self.game.history = None
+        self.game.set_candidate(hello, (8, 8), True)
+        self.assert_(not self.game.validate_candidate())
+
+        # Try some invalid crosses now
+        clear_game()
+        self.game.set_candidate(hello, (7, 7), False)
+        self.game.validate_candidate()
+
+        self.game.history = object()
+        self.game.candidate = None
+        self.game.set_candidate(hello, (9, 9), True)     # No hook or cross
+        self.assert_(not self.game.validate_candidate())
+
+        clear_game()
+        self.game.set_candidate(hello, (7, 7), False)
+        self.game.validate_candidate()
+
+        self.game.history = object()
+        self.game.candidate = None
+        self.game.set_candidate('HO', (7, 8), True)     # Not a word (HHO)
+        self.assert_(not self.game.validate_candidate())

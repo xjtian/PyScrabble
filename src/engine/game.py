@@ -116,8 +116,8 @@ class ScrabbleGame(object):
             for bp in self.candidate.positions:
                 if bp.pos == (7, 7):
                     break
-        else:
-            return False    # First turn but move doesn't cover middle square
+            else:
+                return False    # First turn but move doesn't cover middle square
 
         word_multiplier = 1
         lx, ly = self.candidate.positions[0].pos
@@ -175,7 +175,7 @@ class ScrabbleGame(object):
         if word.upper() not in lexicon_set.global_set:
             return False
 
-        return self.__check_crosses() and hooked
+        return self.__check_crosses() or hooked
 
     def remove_candidate(self):
         """
@@ -236,10 +236,15 @@ class ScrabbleGame(object):
         sub = []
         x, y = pos
 
+        if y + i >= len(self.board[x]) if horizontal else x + i >= len(self.board):
+            return sub
+
         l = self.board[x][y + i] if horizontal else self.board[x + i][y]
         while l not in board.empty_locations:
             sub.append(l)
             i += -1 if pre else 1
+            if y + i >= len(self.board[x]) if horizontal else x + i >= len(self.board):
+                break
             l = self.board[x][y + i] if horizontal else self.board[x + i][y]
 
         if pre:
