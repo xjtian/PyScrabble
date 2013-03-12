@@ -167,9 +167,9 @@ class ScrabbleGame(object):
 
         # Construct the word that makes up the play
         if self.candidate.horizontal:
-            body = ''.join([self.board[x][y + i] for i in xrange(0, ly - y)])
+            body = ''.join([self.board[x][y + i] for i in xrange(0, ly - y + 1)])
         else:
-            body = ''.join([self.board[x + i][y] for i in xrange(0, lx - x)])
+            body = ''.join([self.board[x + i][y] for i in xrange(0, lx - x + 1)])
         word = '%s%s%s' % (prefix, body, suffix)
 
         if word.upper() not in lexicon_set.global_set:

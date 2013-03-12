@@ -6,4 +6,4 @@ global_set = {}
 def read_lexicon(filename):
     global global_set
     with open(filename, 'r') as dictionary:
-        global_set = {word[:-1] for word in dictionary.readlines()}
+        global_set = {word.strip() for word in dictionary.readlines()}
