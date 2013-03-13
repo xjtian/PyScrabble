@@ -1,5 +1,3 @@
-from engine.move import Move
-
 __author__ = 'Jacky'
 
 import copy
@@ -220,11 +218,17 @@ class ScrabbleGame(object):
     def pass_turn(self):
         """
         Pass the current player's turn. This ends the current turn with no move and commits to the game tree.
+
+        @return: True if the current turn is passable, False otherwise (e.g. candidate on board)
         """
+        if self.candidate is not None:
+            return False
+
         newstate = StateNode(None)
         newstate.action = MoveTypes.Pass
 
         self.__commit_state(newstate)
+        return True
 
     def exchange_tiles(self, letters):
         """
@@ -235,9 +239,10 @@ class ScrabbleGame(object):
         @param letters: Letters to exchange
         @return: True if everything was valid, False if any errors were encountered.
         """
-        if len(self.bag) < len(letters):
+        if len(self.bag) < len(letters) or self.candidate is not None:
             return False
 
+        self.candidate = move.Move()
         holder = []
         rack = self.players[self.current_turn].rack
         for letter in letters:
@@ -255,6 +260,7 @@ class ScrabbleGame(object):
         newstate.action = MoveTypes.Exchange
 
         self.__commit_state(newstate)
+        return True
 
     def __commit_state(self, state):
         state.previous = self.history

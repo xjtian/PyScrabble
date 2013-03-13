@@ -228,3 +228,30 @@ class TestScrabbleGame(unittest.TestCase):
 
         self.assertIsNotNone(self.game.history)
         self.assertEqual(MoveTypes.Pass, self.game.history.action)
+
+    def test_exchange_tiles(self):
+        self.game.add_player('Bob')
+        self.game.players[0].rack = ['H', 'E', 'L', 'L', 'O', ' ', ' ']
+        self.game.bag = ['A', 'B', 'C', 'D', 'E']
+
+        hello = ['H', 'E', 'L', 'L', 'O']
+        bag = ['A', 'B', 'C', 'D', 'E']
+
+        self.assert_(self.game.exchange_tiles('HELLO'))
+        self.assert_(all([letter in self.game.bag for letter in hello]))
+        self.assert_(all([letter in self.game.players[0].rack for letter in bag]))
+
+        self.assertEqual(5, len(self.game.bag))
+        self.assertEqual(7, len(self.game.players[0].rack))
+
+        self.assertIsNotNone(self.game.history)
+        self.assertEqual(MoveTypes.Exchange, self.game.history.action)
+        self.assert_(all([letter in self.game.history.move.drawn for letter in bag]))
+
+        self.assert_(not self.game.exchange_tiles('ABCDE  '))     # Not enough stuff in bag
+        self.assert_(all([letter in self.game.players[0].rack for letter in bag]))
+        self.assert_(all([letter in self.game.bag for letter in hello]))
+
+        self.assert_(not self.game.exchange_tiles('ABCDEQ'))    # Non-existent letter
+        self.assert_(all([letter in self.game.players[0].rack for letter in bag]))
+        self.assert_(all([letter in self.game.bag for letter in hello]))
