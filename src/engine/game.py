@@ -1,3 +1,5 @@
+from engine.move import Move
+
 __author__ = 'Jacky'
 
 import copy
@@ -216,8 +218,41 @@ class ScrabbleGame(object):
         self.__commit_state(newstate)
 
     def pass_turn(self):
+        """
+        Pass the current player's turn. This ends the current turn with no move and commits to the game tree.
+        """
         newstate = StateNode(None)
         newstate.action = MoveTypes.Pass
+
+        self.__commit_state(newstate)
+
+    def exchange_tiles(self, letters):
+        """
+        Current player exchanges up to 7 letters with the bag. If there are not enough letters in the bag to exchange,
+        this method will not do anything. Otherwise, the letters are exchanged and the move is committed to the game
+        tree.
+
+        @param letters: Letters to exchange
+        @return: True if everything was valid, False if any errors were encountered.
+        """
+        if len(self.bag) < len(letters):
+            return False
+
+        holder = []
+        rack = self.players[self.current_turn].rack
+        for letter in letters:
+            try:
+                holder.append(rack.pop(rack.index(letter)))
+            except ValueError:
+                rack += holder
+                return False
+
+        self.candidate.drawn = [self.bag.pop(random.randint(0, len(self.bag) - 1)) for _ in xrange(0, len(letters))]
+        rack += self.candidate.drawn
+        self.bag += holder
+
+        newstate = StateNode(self.candidate)
+        newstate.action = MoveTypes.Exchange
 
         self.__commit_state(newstate)
 
@@ -236,7 +271,7 @@ class ScrabbleGame(object):
 
         @param pos: Tuple of position on board to check for a prefix before.
         @param horizontal: Boolean value to set which direction to look in.
-        @return: Prefix preceeding the given position on the board.
+        @return: Prefix preceding the given position on the board.
         """
 
         return ''.join(self.__pre_suff_helper(pos, horizontal, True))
