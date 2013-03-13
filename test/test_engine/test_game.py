@@ -147,7 +147,12 @@ class TestScrabbleGame(unittest.TestCase):
         self.assert_(self.game.validate_candidate())
         self.assertEqual(11, self.game.candidate.score)
 
-        # TODO: Tests for blank tiles (scoring and validating)
+        clear_game()
+        self.game.history = None
+
+        self.game.set_candidate('AB', (7, 7), True)
+        self.assert_(self.game.validate_candidate())
+        self.assertEqual(0, self.game.candidate.score)
 
         # Try an invalid first move
         clear_game()

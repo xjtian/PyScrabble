@@ -175,7 +175,13 @@ class ScrabbleGame(object):
         if word.upper() not in lexicon_set.global_set:
             return False
 
-        return self.__check_crosses() or hooked
+        cross = self.__check_crosses()
+        if not cross:
+            return hooked
+        elif cross == -1:
+            return False
+        else:   # cross == 1
+            return True
 
     def remove_candidate(self):
         """
@@ -257,12 +263,12 @@ class ScrabbleGame(object):
         Check that all crosses created by the candidate move are valid. Calling this method will also update the score
         value of the candidate move.
 
-        @return: True if the candidate move produces valid crosses, False otherwise.
+        @return: 1 if crosses exist, 0 if no crosses, and -1 if invalid crosses exist
         """
         if not self.history:    # First turn, no crosses possible
-            return True
+            return 0
 
-        crosses = False
+        crosses = 0
         for bpos in self.candidate.positions:
             x, y = bpos.pos
             prefix = self.__get_prefix(bpos.pos, not self.candidate.horizontal)
@@ -271,9 +277,9 @@ class ScrabbleGame(object):
             cross = '%s%s%s' % (prefix, bpos.letter, suffix)
             if len(cross) > 1:
                 if cross.upper() not in lexicon_set.global_set:
-                    return False
+                    return -1
                 else:
-                    crosses = True
+                    crosses = 1
                     subscore = 0
                     for l in prefix:
                         subscore += letters.letter_scores.get(l, 0)
