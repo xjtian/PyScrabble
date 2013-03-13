@@ -154,6 +154,26 @@ class TestScrabbleGame(unittest.TestCase):
         self.assert_(self.game.validate_candidate())
         self.assertEqual(0, self.game.candidate.score)
 
+        # Try a move with a tile on the edge
+        clear_game()
+        self.game.history = None
+
+        self.game.set_candidate(hello, (3, 7), False)
+        self.game.validate_candidate()
+
+        self.game.history = object()
+        self.game.candidate = None
+        self.game.set_candidate('ELLO', (3, 8), True)
+        self.game.validate_candidate()
+
+        self.game.candidate = None
+        self.game.set_candidate('LW', (2, 11), False)
+        self.assert_(self.game.validate_candidate())
+
+        self.game.candidate = None
+        self.game.set_candidate('HAT', (4, 12), True)
+        self.assert_(self.game.validate_candidate())
+
         # Try an invalid first move
         clear_game()
         self.game.history = None
