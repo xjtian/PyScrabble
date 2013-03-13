@@ -211,3 +211,20 @@ class TestScrabbleGame(unittest.TestCase):
         self.assertEqual(7, len(self.game.players[0].rack))
         self.assertNotEqual(['H', 'E', 'L', 'L', 'O', ' ', ' '], self.game.players[0].rack)
         self.assertEqual(len(default_bag) - 5, len(self.game.bag))
+
+    def test_pass_turn(self):
+        self.game.add_player('Bob')
+        self.game.players[0].rack = ['H', 'E', 'L', 'L', 'O', ' ', ' ']
+
+        self.game.add_player('Jane')
+        self.game.players[1].rack = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+
+        self.game.pass_turn()
+        self.assertEqual(1, self.game.current_turn)
+        self.assertEqual(0, self.game.players[0].score)
+        self.assertEqual(0, self.game.players[1].score)
+        self.assertEqual(['H', 'E', 'L', 'L', 'O', ' ', ' '], self.game.players[0].rack)
+        self.assertEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G'], self.game.players[1].rack)
+
+        self.assertIsNotNone(self.game.history)
+        self.assertEqual(MoveTypes.Pass, self.game.history.action)
