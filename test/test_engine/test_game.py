@@ -4,7 +4,7 @@ import unittest
 from copy import deepcopy
 
 from collections import Counter
-from engine.game import ScrabbleGame
+from engine.game import ScrabbleGame, MoveTypes
 from engine import board
 
 from engine.letters import default_bag
@@ -178,3 +178,36 @@ class TestScrabbleGame(unittest.TestCase):
         self.game.candidate = None
         self.game.set_candidate('HO', (7, 8), True)     # Not a word (HHO)
         self.assert_(not self.game.validate_candidate())
+
+    def test_remove_candidate(self):
+        self.game.add_player('Bob')
+        self.game.players[0].rack = ['H', 'E', 'L', 'L', 'O', ' ', ' ']
+
+        self.game.set_candidate('HELLO', (7, 7), True)
+        self.game.validate_candidate()
+
+        self.game.remove_candidate()
+        self.assertIsNone(self.game.candidate)
+        self.assertEqual(self.game.board, board.default_board)
+        self.assertEqual(0, self.game.players[0].score)
+
+    def test_commit_candidate(self):
+        self.game.add_player('Bob')
+        self.game.players[0].rack = ['H', 'E', 'L', 'L', 'O', ' ', ' ']
+
+        self.game.set_candidate('HELLO', (7, 7), True)
+        self.game.validate_candidate()
+        self.game.commit_candidate()
+
+        self.assertIsNone(self.game.candidate)
+        self.assertIsNotNone(self.game.history)
+
+        self.assertEqual(MoveTypes.Placed, self.game.history.action)
+        self.assertIsNone(self.game.history.previous)
+
+        self.assertEqual(0, self.game.current_turn)
+        self.assertEqual(18, self.game.players[0].score)
+
+        self.assertEqual(7, len(self.game.players[0].rack))
+        self.assertNotEqual(['H', 'E', 'L', 'L', 'O', ' ', ' '], self.game.players[0].rack)
+        self.assertEqual(len(default_bag) - 5, len(self.game.bag))

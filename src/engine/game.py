@@ -199,17 +199,32 @@ class ScrabbleGame(object):
         state to the game tree.
         """
         self.players[self.current_turn].use_letters(''.join([bp.letter for bp in self.candidate.positions]))
-        self.candidate.drawn = [self.bag.pop(random.randint(0, len(self.bag) - 1))
-                                for _ in xrange(0, len(self.candidate.positions))]
+        if len(self.bag) >= len(self.candidate.positions):
+            self.candidate.drawn = [self.bag.pop(random.randint(0, len(self.bag) - 1))
+                                    for _ in xrange(0, len(self.candidate.positions))]
+        else:
+            self.candidate.drawn = self.bag[:]
+            self.bag = []
+
         for letter in self.candidate.drawn:
             self.players[self.current_turn].rack.append(letter)
         self.players[self.current_turn].score += self.candidate.score
 
         newstate = StateNode(self.candidate)
         newstate.action = MoveTypes.Placed
-        newstate.previous = self.history
 
-        self.history = newstate
+        self.__commit_state(newstate)
+
+    def pass_turn(self):
+        newstate = StateNode(None)
+        newstate.action = MoveTypes.Pass
+
+        self.__commit_state(newstate)
+
+    def __commit_state(self, state):
+        state.previous = self.history
+
+        self.history = state
         self.current_turn += 1
         self.current_turn %= len(self.players)
 
