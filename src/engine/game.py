@@ -312,6 +312,7 @@ class ScrabbleGame(object):
                 holder.append(rack.pop(rack.index(letter)))
             except ValueError:
                 rack += holder
+                self.candidate = None
                 return False
 
         self.candidate.drawn = [self.bag.pop(random.randint(0, len(self.bag) - 1)) for _ in xrange(0, len(letters))]
