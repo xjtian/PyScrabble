@@ -34,6 +34,30 @@ class ScrabbleGame(object):
 
         lexicon_set.read_lexicon(WORDLIST_PATH)
 
+    def current_player_info(self):
+        """
+        Returns information about the current player as a dictionary. Keys are 'name', 'rack'
+        """
+        if not self.players:
+            return ''
+
+        info = dict()
+        raw_letters = ''.join(self.players[self.current_turn].rack)
+        rack = ''
+        for letter in raw_letters:
+            rack += '%s%d ' % (letter, letters.letter_scores.get(letter, 0))
+
+        info['name'] = self.players[self.current_turn].name
+        info['rack'] = rack
+
+        return info
+
+    def get_scores(self):
+        """
+        Returns a dictionary with scores keyed by player name
+        """
+        return {player.name: player.score for player in self.players}
+
     def add_player(self, name):
         if len(self.players) > 3:
             return False
