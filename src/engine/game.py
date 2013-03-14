@@ -175,6 +175,10 @@ class ScrabbleGame(object):
         if word.upper() not in lexicon_set.global_set:
             return False
 
+        # Bingo!
+        if len(self.candidate.positions) >= 7:
+            self.candidate.score += 50
+
         cross = self.__check_crosses()
         if not cross:
             return hooked
