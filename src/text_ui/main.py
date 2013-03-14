@@ -7,6 +7,16 @@ game = ScrabbleGame()
 columns = letters[:len(game.board[0])].upper()
 
 
+def ignore_err(fn):
+    def decorator():
+        try:
+            fn()
+        except ValueError:
+            print '\nYou typed something wrong.\n'
+
+    return decorator
+
+
 def print_game():
     print '    ' + ' '.join(columns)
     for i, row in enumerate(game.board):
@@ -33,6 +43,7 @@ def start_game():
     game.start_game()
 
 
+@ignore_err
 def get_move():
     RE_INVALID = 'INVALID MOVE CANDIDATE\n'
 
