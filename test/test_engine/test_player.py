@@ -39,6 +39,10 @@ class TestPlayer(unittest.TestCase):
         for letter in 'HELLO':
             self.assertIn(letter, l)
 
+        # What if the blank is a second instance of an existing letter?
+        l = self.player.valid_play('LLLL')
+        self.assertEqual(1, l.count('l'))
+
     def test_use_letters(self):
         self.player.rack = list('DEADBEEF')
 
