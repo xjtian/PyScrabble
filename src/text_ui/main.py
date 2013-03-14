@@ -87,5 +87,15 @@ def main():
         print_game()
         get_move()
 
+    print '\n-----Game Over!-----'
+    print 'Final scores: '
+    scores = game.get_scores()
+    for k, v in scores.items():
+        print '%s: %d' % (k, v)
+
+    # This doesn't care about ties, but it'll do for now.
+    winner = max(scores.items(), key=scores.get)
+    print 'The winner was %s with %d points!' % (winner[0], winner[1])
+
 if __name__ == '__main__':
     main()
