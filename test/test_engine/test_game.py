@@ -203,6 +203,47 @@ class TestScrabbleGame(unittest.TestCase):
         self.game.set_candidate('HO', (7, 8), True)     # Not a word (HHO)
         self.assert_(not self.game.validate_candidate())
 
+    def test_specific_cases(self):
+        """
+        Some tests for unexpected outcomes encountered when playing the game
+        """
+        def parse_situation(s):
+            lines = situation.splitlines()
+            return [line[line.index('|') + 2:].split(' ') for line in lines]
+
+        # The problem with this case was that the prefix finder wrapped around because the first letter was on an edge.
+        # 'HUMVEE' was added as a prefix to the attempted play 'RASING', which clearly made it invalid
+
+        situation = """ 0| # . . 2 . . . J I L T 2 . . #
+             1| . @ . . . Y . . . 3 O W . @ .
+             2| . . @ . . O F . 2 . K I P . .
+             3| 2 . . @ . D I F . D E N E . 2
+             4| . . . . @ . Z A . I D . A . .
+             5| . 3 . . . 3 . C . V . . R 3 .
+             6| . . 2 . . . 2 a W A . . L . G
+             7| # . . 2 . . . D O N . C . . R
+             8| . . 2 . . . Y E N . . O 2 . I
+             9| . 3 . . . 3 O . . 3 H E . U M
+            10| . . . . P L U G . . A N . R E
+            11| 2 . . Q I . . R . . B A . T 2
+            12| . . @ . . . 2 I 2 H U M V E E
+            13| . @ . . . 3 . O . 3 . O . X .
+            14| # . . 2 . . . T o L E R A T E"""
+        current_rack = list('RAASIGN')
+        attempt = {'letters': 'RASING', 'pos': (12, 0), 'horiz': True}
+
+        # Setup the game
+        self.game.add_player('Player 1')
+        self.game.add_player('Player 2')
+        self.game.current_turn = 1
+        self.game.players[1].rack = current_rack
+        self.game.history = object()
+
+        self.game.board = parse_situation(situation)    # Set the board
+        # Set the candidate attempt to the improper failure
+        self.assert_(self.game.set_candidate(attempt['letters'], attempt['pos'], attempt['horiz']))
+        self.assert_(self.game.validate_candidate())
+
     def test_remove_candidate(self):
         self.game.add_player('Bob')
         self.game.players[0].rack = ['H', 'E', 'L', 'L', 'O', ' ', ' ']

@@ -365,7 +365,8 @@ class ScrabbleGame(object):
         sub = []
         x, y = pos
 
-        if y + i >= len(self.board[x]) if horizontal else x + i >= len(self.board):
+        # If the end/beginning of the word lies on an edge, no need to check for suffix/prefix.
+        if (y + i >= len(self.board[x]) or y + i < 0) if horizontal else (x + i >= len(self.board) or x + i < 0):
             return sub
 
         l = self.board[x][y + i] if horizontal else self.board[x + i][y]
