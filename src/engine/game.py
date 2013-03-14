@@ -32,6 +32,11 @@ class ScrabbleGame(object):
         self.history = None
         self.candidate = None
 
+        self.game_over = False
+        self.game_started = False
+
+        self.passes = 0
+
         lexicon_set.read_lexicon(WORDLIST_PATH)
 
     def current_player_info(self):
@@ -39,13 +44,13 @@ class ScrabbleGame(object):
         Returns information about the current player as a dictionary. Keys are 'name', 'rack'
         """
         if not self.players:
-            return ''
+            return dict()
 
         info = dict()
         raw_letters = ''.join(self.players[self.current_turn].rack)
         rack = ''
         for letter in raw_letters:
-            rack += '%s%d ' % (letter, letters.letter_scores.get(letter, 0))
+            rack += '%s%d ' % (letter if letter != ' ' else '_', letters.letter_scores.get(letter, 0))
 
         info['name'] = self.players[self.current_turn].name
         info['rack'] = rack
@@ -59,15 +64,24 @@ class ScrabbleGame(object):
         return {player.name: player.score for player in self.players}
 
     def add_player(self, name):
+        if self.game_started:
+            return False
+
         if len(self.players) > 3:
             return False
         self.players.append(player.Player(name))
         return True
 
     def start_game(self):
+        if self.game_started:
+            return False
+
         n = len(self.players)
         for i in xrange(0, 7 * n):
             self.players[i % n].rack.append(self.bag.pop(random.randint(0, len(self.bag) - 1)))
+
+        self.game_started = True
+        return True
 
     def set_candidate(self, letters, pos, horizontal):
         """
@@ -79,8 +93,11 @@ class ScrabbleGame(object):
         @param pos: x,y position of the first tile of the play.
         @param horizontal: True if the play is horizontal, False otherwise.
         @return: True if function succeeds, False if any letters aren't in player's rack, there's already a candidate,
-        or the move goes out of the board.
+        the move goes out of the board, or the game is over.
         """
+        if self.game_over:
+            return False
+
         from_rack = self.players[self.current_turn].valid_play(letters)
         b_height, b_width = len(self.board), len(self.board[0])
         if self.candidate or not letters or (pos[0] < 0 or pos[0] >= b_height) or \
@@ -117,7 +134,7 @@ class ScrabbleGame(object):
 
         @return: True if the move is valid, False if it is invalid.
         """
-        if not self.candidate.positions:
+        if not self.candidate.positions or self.game_over:
             return False
 
         self.candidate.sort_letters()
@@ -211,17 +228,24 @@ class ScrabbleGame(object):
         """
         Remove the current candidate move.
         """
+        if self.game_over:
+            return False
+
         for bpos in self.candidate.positions:
             x, y = bpos.pos
             self.board[x][y] = board.default_board[x][y]
 
         self.candidate = None
+        return True
 
     def commit_candidate(self):
         """
         Commit the candidate move. This updates scores, draws new tiles for the player, ends the turn, and adds a new
         state to the game tree.
         """
+        if self.game_over:
+            return False
+
         self.players[self.current_turn].use_letters(''.join([bp.letter for bp in self.candidate.positions]))
         if len(self.bag) >= len(self.candidate.positions):
             self.candidate.drawn = [self.bag.pop(random.randint(0, len(self.bag) - 1))
@@ -237,7 +261,13 @@ class ScrabbleGame(object):
         newstate = StateNode(self.candidate)
         newstate.action = MoveTypes.Placed
 
+        if not len(self.players[self.current_turn].rack) and not len(self.bag):
+            self.game_over = True
+
         self.__commit_state(newstate)
+        self.passes = 0
+
+        return True
 
     def pass_turn(self):
         """
@@ -245,13 +275,17 @@ class ScrabbleGame(object):
 
         @return: True if the current turn is passable, False otherwise (e.g. candidate on board)
         """
-        if self.candidate is not None:
+        if self.candidate is not None or self.game_over:
             return False
 
         newstate = StateNode(None)
         newstate.action = MoveTypes.Pass
 
         self.__commit_state(newstate)
+        self.passes += 1
+        if self.passes >= 6:
+            self.game_over = True
+
         return True
 
     def exchange_tiles(self, letters):
@@ -263,7 +297,7 @@ class ScrabbleGame(object):
         @param letters: Letters to exchange
         @return: True if everything was valid, False if any errors were encountered.
         """
-        if len(self.bag) < len(letters) or self.candidate is not None:
+        if len(self.bag) < len(letters) or self.candidate is not None or self.game_over:
             return False
 
         self.candidate = move.Move()
@@ -284,6 +318,10 @@ class ScrabbleGame(object):
         newstate.action = MoveTypes.Exchange
 
         self.__commit_state(newstate)
+        self.passes += 1
+        if self.passes >= 6:
+            self.game_over = True
+
         return True
 
     def __commit_state(self, state):
