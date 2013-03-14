@@ -65,6 +65,10 @@ class TestScrabbleGame(unittest.TestCase):
             self.assertEqual(hello[i], bp.letter)
             self.assertEqual((i, 0), bp.pos)
 
+        # Try a move with the last letter on the edge
+        self.game.candidate = None
+        self.assert_(self.game.set_candidate('AB', (0, 13), True))
+
         # Didn't clear the candidate so this should return False
         self.assert_(not self.game.set_candidate(hello, (0, 0), True))
 

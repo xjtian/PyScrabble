@@ -108,7 +108,7 @@ class ScrabbleGame(object):
         self.candidate.horizontal = horizontal
         x, y = pos
         j = 0
-        for letter in from_rack:
+        for i, letter in enumerate(from_rack):
             if horizontal:
                 while self.board[x][y + j] not in board.empty_locations:
                     j += 1
@@ -124,7 +124,7 @@ class ScrabbleGame(object):
             j += 1
             # Check bounds
             if (horizontal and y + j >= b_width) or (not horizontal and x + j >= b_height):
-                return False
+                return i == len(from_rack) - 1  # Was the last letter placed before incrementing?
 
         return True
 
