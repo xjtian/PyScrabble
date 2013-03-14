@@ -1,5 +1,7 @@
 __author__ = 'Jacky'
 
+from collections import Counter
+
 
 class Player(object):
     def __init__(self, name):
@@ -9,16 +11,23 @@ class Player(object):
         self.rack = []
 
     def valid_play(self, letters):
-        blank_count = self.rack.count(' ')
+        """
+        Returns the way the given letters to be played are played from the player's rack. If a blank is used, the
+        corresponding letter is replaced with a lowercase one. If the play is not possible, an empty list is returned.
+
+        Note that this method will put off using a blank until the last possible letter.
+        """
         llist = list(letters)
+        counter = dict(Counter(self.rack))
 
         for i, letter in enumerate(letters):
-            if letter not in self.rack:
-                if blank_count:
-                    blank_count -= 1
-                    llist[i] = llist[i].lower()     # Use a blank
-                else:
-                    return []
+            if not counter.get(letter, 0) and not counter.get(' ', 0):
+                return []
+            elif not counter.get(letter, 0) and counter[' ']:   # Use up a blank
+                counter[' '] -= 1
+                llist[i] = llist[i].lower()
+            else:   # Letter exists on the rack
+                counter[letter] -= 1
 
         return llist
 
