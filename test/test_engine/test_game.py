@@ -279,3 +279,6 @@ class TestScrabbleGame(unittest.TestCase):
         self.assert_(not self.game.exchange_tiles('ABCDEQ'))    # Non-existent letter
         self.assert_(all([letter in self.game.players[0].rack for letter in bag]))
         self.assert_(all([letter in self.game.bag for letter in hello]))
+
+        # Make sure that exchange works properly after a failed attempt
+        self.assert_(self.game.exchange_tiles('AB'))
