@@ -43,10 +43,10 @@ def get_move():
     if choice == 1:
         letters = raw_input('Enter the tiles you want to play: ').upper()
         x = int(raw_input('Row number: '))
-        y = columns.index(raw_input('Column Letter: '))
-        h = raw_input('H for horizontal, V for vertical: ')
+        y = columns.index(raw_input('Column Letter: ').upper())
+        h = raw_input('H for horizontal, V for vertical: ').upper()
 
-        if game.set_candidate(letters, (x, y), h.upper() == 'H'):
+        if game.set_candidate(letters, (x, y), h == 'H'):
             if game.validate_candidate():
                 print '\n%s played %s at (%d, %d) for %d points\n' % (
                     game.current_player_info()['name'], letters, x, y, game.candidate.score)
