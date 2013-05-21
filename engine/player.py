@@ -12,10 +12,13 @@ class Player(object):
 
     def valid_play(self, letters):
         """
-        Returns the way the given letters to be played are played from the player's rack. If a blank is used, the
-        corresponding letter is replaced with a lowercase one. If the play is not possible, an empty list is returned.
+        Returns the way the given letters to be played are played from the
+        player's rack. If a blank is used, the corresponding letter is
+        replaced with a lowercase one. If the play is not possible, an empty
+        list is returned.
 
-        Note that this method will put off using a blank until the last possible letter.
+        Note that this method will put off using a blank until the last
+        possible letter.
         """
         llist = list(letters)
         counter = dict(Counter(self.rack))
@@ -23,7 +26,7 @@ class Player(object):
         for i, letter in enumerate(letters):
             if not counter.get(letter, 0) and not counter.get(' ', 0):
                 return []
-            elif not counter.get(letter, 0) and counter[' ']:   # Use up a blank
+            elif not counter.get(letter, 0) and counter[' ']:   # Use a blank
                 counter[' '] -= 1
                 llist[i] = llist[i].lower()
             else:   # Letter exists on the rack

@@ -1,7 +1,6 @@
 __author__ = 'Jacky'
 
 import unittest
-import os
 from copy import deepcopy
 
 from collections import Counter
@@ -24,7 +23,8 @@ class TestScrabbleGame(unittest.TestCase):
         self.assert_(self.game.add_player('Bob4'))
 
         names = [player.name for player in self.game.players]
-        self.assert_(all(name in names for name in ['Bob', 'Bob2', 'Bob3', 'Bob4']))
+        self.assert_(
+            all(name in names for name in ['Bob', 'Bob2', 'Bob3', 'Bob4']))
 
         self.assert_(not self.game.add_player('Bob5'))
         self.assertEqual(4, len(self.game.players))
@@ -121,7 +121,8 @@ class TestScrabbleGame(unittest.TestCase):
         self.game.validate_candidate()
         self.assertEqual(18, self.game.candidate.score)
 
-        # With 'HELLO' placed vertically down from start square, try some crosses
+        # With 'HELLO' placed vertically down from start square,
+        # try some crosses
         self.game.history = object()    # Just so game.history is not None
 
         self.game.candidate = None
@@ -208,12 +209,15 @@ class TestScrabbleGame(unittest.TestCase):
         """
         Some tests for unexpected outcomes encountered when playing the game
         """
+
         def parse_situation(s):
             lines = situation.splitlines()
             return [line[line.index('|') + 2:].split(' ') for line in lines]
 
-        # The problem with this case was that the prefix finder wrapped around because the first letter was on an edge.
-        # 'HUMVEE' was added as a prefix to the attempted play 'RASING', which clearly made it invalid
+        # The problem with this case was that the prefix finder wrapped
+        # around because the first letter was on an edge. 'HUMVEE' was added
+        # as a prefix to the attempted play 'RASING', which clearly made it
+        # invalid
 
         situation = """ 0| # . . 2 . . . J I L T 2 . . #
              1| . @ . . . Y . . . 3 O W . @ .
@@ -242,7 +246,9 @@ class TestScrabbleGame(unittest.TestCase):
 
         self.game.board = parse_situation(situation)    # Set the board
         # Set the candidate attempt to the improper failure
-        self.assert_(self.game.set_candidate(attempt['letters'], attempt['pos'], attempt['horiz']))
+        self.assert_(
+            self.game.set_candidate(attempt['letters'], attempt['pos'],
+                                    attempt['horiz']))
         self.assert_(self.game.validate_candidate())
 
     def test_remove_candidate(self):
@@ -275,7 +281,8 @@ class TestScrabbleGame(unittest.TestCase):
         self.assertEqual(18, self.game.players[0].score)
 
         self.assertEqual(7, len(self.game.players[0].rack))
-        self.assertNotEqual(['H', 'E', 'L', 'L', 'O', ' ', ' '], self.game.players[0].rack)
+        self.assertNotEqual(['H', 'E', 'L', 'L', 'O', ' ', ' '],
+                            self.game.players[0].rack)
         self.assertEqual(len(default_bag) - 5, len(self.game.bag))
 
     def test_pass_turn(self):
@@ -289,8 +296,10 @@ class TestScrabbleGame(unittest.TestCase):
         self.assertEqual(1, self.game.current_turn)
         self.assertEqual(0, self.game.players[0].score)
         self.assertEqual(0, self.game.players[1].score)
-        self.assertEqual(['H', 'E', 'L', 'L', 'O', ' ', ' '], self.game.players[0].rack)
-        self.assertEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G'], self.game.players[1].rack)
+        self.assertEqual(['H', 'E', 'L', 'L', 'O', ' ', ' '],
+                         self.game.players[0].rack)
+        self.assertEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+                         self.game.players[1].rack)
 
         self.assertIsNotNone(self.game.history)
         self.assertEqual(MoveTypes.Pass, self.game.history.action)
@@ -305,21 +314,27 @@ class TestScrabbleGame(unittest.TestCase):
 
         self.assert_(self.game.exchange_tiles('HELLO'))
         self.assert_(all([letter in self.game.bag for letter in hello]))
-        self.assert_(all([letter in self.game.players[0].rack for letter in bag]))
+        self.assert_(
+            all([letter in self.game.players[0].rack for letter in bag]))
 
         self.assertEqual(5, len(self.game.bag))
         self.assertEqual(7, len(self.game.players[0].rack))
 
         self.assertIsNotNone(self.game.history)
         self.assertEqual(MoveTypes.Exchange, self.game.history.action)
-        self.assert_(all([letter in self.game.history.move.drawn for letter in bag]))
+        self.assert_(
+            all([letter in self.game.history.move.drawn for letter in bag]))
 
-        self.assert_(not self.game.exchange_tiles('ABCDE  '))     # Not enough stuff in bag
-        self.assert_(all([letter in self.game.players[0].rack for letter in bag]))
+        self.assert_(not self.game.exchange_tiles(
+            'ABCDE  '))     # Not enough stuff in bag
+        self.assert_(
+            all([letter in self.game.players[0].rack for letter in bag]))
         self.assert_(all([letter in self.game.bag for letter in hello]))
 
-        self.assert_(not self.game.exchange_tiles('ABCDEQ'))    # Non-existent letter
-        self.assert_(all([letter in self.game.players[0].rack for letter in bag]))
+        self.assert_(
+            not self.game.exchange_tiles('ABCDEQ'))    # Non-existent letter
+        self.assert_(
+            all([letter in self.game.players[0].rack for letter in bag]))
         self.assert_(all([letter in self.game.bag for letter in hello]))
 
         # Make sure that exchange works properly after a failed attempt

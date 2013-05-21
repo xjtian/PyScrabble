@@ -6,8 +6,9 @@ import cPickle as Pickle
 
 class GaddagState(object):
     """
-    A state (node) in a GADDAG. Each state contains a letter set (the set of letters which, if encountered next, make a
-    word) and the arcs leading out of it and their corresponding letters.
+    A state (node) in a GADDAG. Each state contains a letter set (the set of
+    letters which, if encountered next, make a word) and the arcs leading out
+    of it and their corresponding letters.
     """
 
     def __init__(self):
@@ -16,7 +17,8 @@ class GaddagState(object):
 
     def add_arc(self, char):
         """
-        Add an arc from the current state for char if no such arc exists. Returns the node this arc leads to.
+        Add an arc from the current state for char if no such arc exists.
+        Returns the node this arc leads to.
         """
         if char in self.arcs:
             next_state = self.arcs[char]
@@ -28,8 +30,8 @@ class GaddagState(object):
 
     def add_final_arc(self, c1, c2):
         """
-        Add an arc from the current state for c1 if no such arc exists and adds c2 to the letter set at that state.
-        Returns the node this arc leads to.
+        Add an arc from the current state for c1 if no such arc exists and adds
+        c2 to the letter set at that state. Returns the node this arc leads to.
         """
         if c1 in self.arcs:
             next_state = self.arcs[c1]
@@ -42,8 +44,8 @@ class GaddagState(object):
 
     def force_arc(self, char, forced_state):
         """
-        Add an arc from the current state for char to forced_state, raising an exception if an arc for char already
-        exists going to any other state.
+        Add an arc from the current state for char to forced_state, raising an
+        exception if an arc for char already exists going to any other state.
         """
         if char in self.arcs:
             if not self.arcs[char] == forced_state:
@@ -54,8 +56,8 @@ class GaddagState(object):
 
 class Gaddag(object):
     """
-    A partially-minimized GADDAG structure to represent a lexicon as described in Steven Gordon's 1994 paper 'A Faster
-    Scrabble Move Generation Algorithm'.
+    A partially-minimized GADDAG structure to represent a lexicon as described
+    in Steven Gordon's 1994 paper 'A Faster Scrabble Move Generation Algorithm'.
     """
 
     def __init__(self):
@@ -77,7 +79,8 @@ class Gaddag(object):
             state = state.add_arc(word[i])
         state = state.add_final_arc('|', word[-1])
 
-        for m in xrange(n - 3, -1, -1):   # partially minimize the remaining paths
+        # partially minimize the remaining paths
+        for m in xrange(n - 3, -1, -1):
             forced_state = state
             state = self.root
             for i in xrange(m, -1, -1):
@@ -87,12 +90,13 @@ class Gaddag(object):
 
     def is_word(self, word):
         """
-        Determines if the given word is in the lexicon represented by the GADDAG. Returns True if the word exists, False
-        otherwise.
+        Determines if the given word is in the lexicon represented by the
+        GADDAG. Returns True if the word exists, False otherwise.
         """
         cur_state = self.root
         for letter in word[:0:-1]:
-            if not letter in cur_state.arcs: return False
+            if not letter in cur_state.arcs:
+                return False
             cur_state = cur_state.arcs[letter]
 
         return word[0] in cur_state.letter_set
@@ -103,9 +107,10 @@ gaddag = Gaddag()
 
 def gaddag_from_file():
     """
-    Create a GADDAG from a text file of a lexicon given by the WORDLIST_PATH setting. The text file should only have the
-    words in the lexicon, one per line, with a blank line at the very end. The created GADDAG will be in the 'gaddag'
-    module variable.
+    Create a GADDAG from a text file of a lexicon given by the WORDLIST_PATH
+    setting. The text file should only have the words in the lexicon, one per
+    line, with a blank line at the very end. The created GADDAG will be in the
+    'gaddag' module variable.
     """
     global gaddag
     try:
@@ -118,7 +123,8 @@ def gaddag_from_file():
 
 def unpickle_gaddag():
     """
-    Unpickle a GADDAG from the GADDAG_PICKLE_PATH setting. The unpickled GADDAG will be in the 'gaddag' module variable.
+    Unpickle a GADDAG from the GADDAG_PICKLE_PATH setting. The unpickled
+    GADDAG will be in the 'gaddag' module variable.
     """
     global gaddag
     try:
