@@ -1,12 +1,13 @@
 __author__ = 'Jacky'
 
 import unittest
+import os
 from copy import deepcopy
 
 from collections import Counter
+
 from engine.game import ScrabbleGame, MoveTypes
 from engine import board
-
 from engine.letters import default_bag
 
 

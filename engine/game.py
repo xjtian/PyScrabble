@@ -5,7 +5,7 @@ import random
 
 from engine import letters, board, player, move
 from lexicon import lexicon_set
-from settings.lexicon import WORDLIST_PATH
+from lexicon.settings import WORDLIST_PATH
 
 
 class MoveTypes(object):
