@@ -106,9 +106,15 @@ class ScrabbleGame(object):
 
         from_rack = self.players[self.current_turn].valid_play(letters)
         b_height, b_width = len(self.board), len(self.board[0])
-        if self.candidate or not letters or (
-                    pos[0] < 0 or pos[0] >= b_height) or \
-                (pos[1] < 0 or pos[1] >= b_width) or not from_rack:
+
+        # Candidate exists already or no letters are being played
+        if self.candidate is not None or not letters:
+            return False
+            # Not a valid play given current rack
+        if not from_rack:
+            return False
+            # First letter placed out of bounds
+        if pos[0] < 0 or pos[0] >= b_height or pos[1] < 0 or pos[1] >= b_width:
             return False
 
         self.candidate = move.Move()
@@ -165,7 +171,6 @@ class ScrabbleGame(object):
                     bp.pos[1] < 0, bp.pos[1] > len(self.board[0])]):
                 return False
 
-
         # If it's the first turn, no need to hook for valid moves
         hooked = not self.history
         if hooked:
@@ -179,6 +184,7 @@ class ScrabbleGame(object):
         lx, ly = self.candidate.positions[0].pos
         for bpos in self.candidate.positions:
             x, y = bpos.pos
+            # Position already occupied
             if self.board[x][y] not in board.empty_locations:
                 return False
 
@@ -190,24 +196,27 @@ class ScrabbleGame(object):
                     existing = self.board[x][i]
                     if existing in board.empty_locations:
                         return False
-                    self.candidate.score += letters.letter_scores.get(existing,
-                                                                      0)
+
+                    letter_score = letters.letter_scores.get(existing, 0)
+                    self.candidate.score += letter_score
             elif not self.candidate.horizontal and x - lx > 1:
                 hooked = True
                 for i in xrange(lx + 1, x):
                     existing = self.board[i][y]
                     if existing in board.empty_locations:
                         return False
-                    self.candidate.score += letters.letter_scores.get(existing,
-                                                                      0)
+
+                    letter_score = letters.letter_scores.get(existing, 0)
+                    self.candidate.score += letter_score
 
             # Process multipliers for placed letter and add to
             # score of candidate
             word_multiplier *= board.word_multipliers.get(self.board[x][y], 1)
             letter_multiplier = board.letter_multipliers.get(
                 self.board[x][y], 1)
-            self.candidate.score += \
-                letters.letter_scores.get(bpos.letter, 0) * letter_multiplier
+
+            letter_score = letters.letter_scores.get(bpos.letter, 0)
+            self.candidate.score += letter_score * letter_multiplier
 
             self.board[x][y] = bpos.letter
             lx, ly = x, y
@@ -217,8 +226,8 @@ class ScrabbleGame(object):
         suffix = self.__get_suffix(self.candidate.positions[-1].pos,
                                    self.candidate.horizontal)
 
-        hooked |= bool(prefix) or bool(
-            suffix)  # Bridging also counts as hooking
+        # Bridging also counts as hooking
+        hooked |= bool(prefix) or bool(suffix)
 
         # Add prefix and suffix to candidate score, then multiply the whole
         # thing by the word multiplier
@@ -240,10 +249,11 @@ class ScrabbleGame(object):
                 [self.board[x + i][y] for i in xrange(0, lx - x + 1)])
         word = '%s%s%s' % (prefix, body, suffix)
 
+        # Not a valid play
         if word.upper() not in lexicon_set.global_set:
             return False
 
-        # Bingo!
+        # Bingo! - all 7 letters in rack used
         if len(self.candidate.positions) >= 7:
             self.candidate.score += 50
 
@@ -252,8 +262,10 @@ class ScrabbleGame(object):
             return hooked
         elif cross == -1:
             return False
-        else:   # cross == 1
+        elif cross == 1:
             return True
+        else:
+            raise Exception('Invalid return %d from __check_crosses' % cross)
 
     def remove_candidate(self):
         """
@@ -277,13 +289,14 @@ class ScrabbleGame(object):
         if self.game_over:
             return False
 
+        # Use the appropriate tiles from the rack
         self.players[self.current_turn].use_letters(
             ''.join([bp.letter for bp in self.candidate.positions]))
         if len(self.bag) >= len(self.candidate.positions):
             self.candidate.drawn = [
                 self.bag.pop(random.randint(0, len(self.bag) - 1))
                 for _ in xrange(0, len(self.candidate.positions))]
-        else:
+        else:   # Put the rest of the bag in the rack
             self.candidate.drawn = self.bag[:]
             self.bag = []
 
@@ -403,8 +416,8 @@ class ScrabbleGame(object):
 
         # If the end/beginning of the word lies on an edge, no need
         # to check for suffix/prefix.
-        if (y + i >= len(self.board[x]) or y + i < 0) if horizontal else (
-                        x + i >= len(self.board) or x + i < 0):
+        if (y + i >= len(self.board[x]) or y + i < 0) if horizontal else \
+            (x + i >= len(self.board) or x + i < 0):
             return sub
 
         l = self.board[x][y + i] if horizontal else self.board[x + i][y]
@@ -442,20 +455,24 @@ class ScrabbleGame(object):
             if len(cross) > 1:
                 if cross.upper() not in lexicon_set.global_set:
                     return -1
-                else:
-                    crosses = 1
-                    subscore = 0
-                    for l in prefix:
-                        subscore += letters.letter_scores.get(l, 0)
-                    for l in suffix:
-                        subscore += letters.letter_scores.get(l, 0)
 
-                    subscore += letters.letter_scores.get(bpos.letter,
-                                                          0) * board.letter_multipliers.get(
-                        board.default_board[x][y], 1)
-                    subscore *= board.word_multipliers.get(
-                        board.default_board[x][y], 1)
+                crosses = 1
+                subscore = 0
 
-                    self.candidate.score += subscore
+                for l in prefix:
+                    subscore += letters.letter_scores.get(l, 0)
+                for l in suffix:
+                    subscore += letters.letter_scores.get(l, 0)
+
+                letter_score = letters.letter_scores.get(bpos.letter, 0)
+                letter_multiplier = board.letter_multipliers.get(
+                    board.default_board[x][y], 1)
+
+                subscore += letter_score * letter_multiplier
+
+                subscore *= board.word_multipliers.get(
+                    board.default_board[x][y], 1)
+
+                self.candidate.score += subscore
 
         return crosses
