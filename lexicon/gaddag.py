@@ -126,6 +126,38 @@ class Gaddag(object):
         else:
             return cur_state.letter_set, set()
 
+    def mid_set(self, prefix, suffix):
+        """
+        Returns the middle cross-set for the given prefix and suffix. In
+        other words, the set of letters such that prefix-l-suffix is a word.
+
+        Parameters:
+            prefix:
+                The prefix to compute the mid-set for.
+            suffix:
+                The accompanying suffix for the mid-set.
+
+        Returns:
+            The middle crossing-set for the prefix and suffix.
+        """
+        cur_state = self.root
+        for letter in suffix[::-1]:
+            if not letter in cur_state.arcs:
+                return set()
+            cur_state = cur_state.arcs[letter]
+
+        letter_set = set()
+        for k, v in cur_state.arcs.iteritems():
+            for letter in prefix[:0:-1]:
+                if not letter in v.arcs:
+                    break
+                v = v.arcs[letter]
+            else:
+                if prefix[0] in v.letter_set:
+                    letter_set.add(k)
+
+        return letter_set
+
 
 gaddag = Gaddag()
 
