@@ -73,3 +73,16 @@ class TestGaddag(unittest.TestCase):
 
         self.assert_(self.gaddag.is_word(self.word))
         self.assert_(not self.gaddag.is_word(self.word[::-1]))
+
+    def test_cross_sets(self):
+        self.gaddag.add_word(self.word)
+
+        subword = self.word[1:]
+        left, right = self.gaddag.cross_sets(subword)
+        self.assertEqual({self.word[0]}, left)
+        self.assertEqual(set(), right)
+
+        subword = self.word[:-1]
+        left, right = self.gaddag.cross_sets(subword)
+        self.assertEqual(set(), left)
+        self.assertEqual({self.word[-1]}, right)

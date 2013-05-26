@@ -101,6 +101,31 @@ class Gaddag(object):
 
         return word[0] in cur_state.letter_set
 
+    def cross_sets(self, word):
+        """
+        Returns the left and right cross-sets for the given string or word.
+
+        Parameters:
+            word:
+                The word/string/subword to compute cross-sets for.
+
+        Returns:
+            (left, right):
+                Tuple of two sets of letters where left is the left
+                cross-set for the word and right is the right cross-set.
+        """
+        cur_state = self.root
+        for letter in word[::-1]:
+            if not letter in cur_state.arcs:
+                return set(), set()
+            cur_state = cur_state.arcs[letter]
+
+        if '|' in cur_state.arcs:
+            d_state = cur_state.arcs['|']
+            return cur_state.letter_set, d_state.letter_set
+        else:
+            return cur_state.letter_set, set()
+
 
 gaddag = Gaddag()
 
