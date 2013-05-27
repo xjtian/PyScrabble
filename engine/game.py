@@ -4,7 +4,7 @@ import copy
 import random
 
 from engine import letters, board, player, move
-from lexicon import lexicon_set
+from lexicon import lexicon_set, gaddag
 from lexicon.settings import WORDLIST_PATH
 
 
@@ -21,7 +21,7 @@ class StateNode(object):
 
 
 class ScrabbleGame(object):
-    def __init__(self):
+    def __init__(self, gaddag=False):
         self.board = copy.deepcopy(board.default_board)
         self.bag = copy.deepcopy(letters.default_bag)
 
@@ -37,7 +37,13 @@ class ScrabbleGame(object):
 
         self.passes = 0
 
+        # Cross sets
+        self.vertical_crosses = [[None] * len(row) for row in self.board]
+        self.horizontal_crosses = [[None] * len(row) for row in self.board]
+
         lexicon_set.read_lexicon(WORDLIST_PATH)
+        if gaddag:
+            gaddag.gaddag_from_file()
 
     def current_player_info(self):
         """
@@ -221,10 +227,11 @@ class ScrabbleGame(object):
             self.board[x][y] = bpos.letter
             lx, ly = x, y
 
-        prefix = self.__get_prefix(self.candidate.positions[0].pos,
-                                   self.candidate.horizontal)
-        suffix = self.__get_suffix(self.candidate.positions[-1].pos,
-                                   self.candidate.horizontal)
+        x, y = self.candidate.positions[0].pos
+        prefix = self.__get_prefix(x, y, self.candidate.horizontal)
+
+        x, y = self.candidate.positions[-1].pos
+        suffix = self.__get_suffix(x, y, self.candidate.horizontal)
 
         # Bridging also counts as hooking
         hooked |= bool(prefix) or bool(suffix)
@@ -289,6 +296,8 @@ class ScrabbleGame(object):
         if self.game_over:
             return False
 
+        self.__redo_crosses()
+
         # Use the appropriate tiles from the rack
         self.players[self.current_turn].use_letters(
             ''.join([bp.letter for bp in self.candidate.positions]))
@@ -314,6 +323,60 @@ class ScrabbleGame(object):
         self.passes = 0
 
         return True
+
+    def __redo_crosses(self):
+        """
+        Recalculate the cross sets for a candidate move that is going to be
+        committed. Assumes board positions are already sorted in the
+        candidate move.
+        """
+        move_word = ''.join([bp.letter for bp in self.candidate.positions])
+        x, y = self.candidate.positions[-1].pos
+        move_suffix = self.__get_suffix(x, y, self.candidate.horizontal)
+
+        x, y = self.candidate.positions[0].pos
+        move_prefix = self.__get_prefix(x, y, self.candidate.horizontal)
+
+        for i, bp in enumerate(self.candidate.positions):
+            x, y = bp.pos
+
+            # Need to peek left/above off first letter (parallel)
+            # TODO: left and right parallel CS here for whole move
+            if i == 0:
+                if self.candidate.horizontal:
+                    if y > 0 and len(move_prefix) == 0:
+                        pass    # TODO: assign left CS here
+                else:
+                    if x > 0 and len(move_prefix) == 0:
+                        pass    # TODO: assign left CS here
+
+            # Need to peek right/below off last letter (parallel)
+            if i == len(self.candidate.positions) - 1:
+                if self.candidate.horizontal:
+                    if y < len(self.board[x]) - 1 and len(move_suffix) == 0:
+                        pass    # TODO: assign right CS here
+                else:
+                    if x < len(self.board) - 1 and len(move_suffix) == 0:
+                        pass    # TODO: assign right CS here
+
+            # Need to peek both directions perpendicular for all letters
+            # TODO: left and right CS here
+            if self.candidate.horizontal:
+                if x > 0:
+                    if self.board[x - 1][y] in board.empty_locations:
+                        pass    # TODO: assign left CS here
+
+                if x < len(self.board) - 1:
+                    if self.board[x + 1][y] in board.empty_locations:
+                        pass    # TODO: assign right CS here
+            else:
+                if y > 0:
+                    if self.board[x][y - 1] in board.empty_locations:
+                        pass    # TODO: assign left CS here
+
+                if y < len(self.board[x]) - 1:
+                    if self.board[x][y + 1] in board.empty_locations:
+                        pass    # TODO: assign right CS here
 
     def pass_turn(self):
         """
@@ -387,37 +450,34 @@ class ScrabbleGame(object):
 
         self.candidate = None
 
-    def __get_prefix(self, pos, horizontal):
+    def __get_prefix(self, x, y, horizontal):
         """
         Returns the prefix the leads up to the given position.
 
-        @param pos: Tuple of position on board to check for a prefix before.
         @param horizontal: Boolean value to set which direction to look in.
         @return: Prefix preceding the given position on the board.
         """
 
-        return ''.join(self.__pre_suff_helper(pos, horizontal, True))
+        return ''.join(self.__pre_suff_helper(x, y, horizontal, True))
 
-    def __get_suffix(self, pos, horizontal):
+    def __get_suffix(self, x, y, horizontal):
         """
         Returns the suffix after the given position.
 
-        @param pos: Tuple of position on board to check for a prefix before.
         @param horizontal: Boolean value to set which direction to look in.
         @return: Suffix after the given position on the board.
         """
 
-        return ''.join(self.__pre_suff_helper(pos, horizontal, False))
+        return ''.join(self.__pre_suff_helper(x, y, horizontal, False))
 
-    def __pre_suff_helper(self, pos, horizontal, pre):
+    def __pre_suff_helper(self, x, y, horizontal, pre):
         i = -1 if pre else 1
         sub = []
-        x, y = pos
 
         # If the end/beginning of the word lies on an edge, no need
         # to check for suffix/prefix.
         if (y + i >= len(self.board[x]) or y + i < 0) if horizontal else \
-            (x + i >= len(self.board) or x + i < 0):
+                (x + i >= len(self.board) or x + i < 0):
             return sub
 
         l = self.board[x][y + i] if horizontal else self.board[x + i][y]
@@ -448,8 +508,8 @@ class ScrabbleGame(object):
         crosses = 0
         for bpos in self.candidate.positions:
             x, y = bpos.pos
-            prefix = self.__get_prefix(bpos.pos, not self.candidate.horizontal)
-            suffix = self.__get_suffix(bpos.pos, not self.candidate.horizontal)
+            prefix = self.__get_prefix(x, y, not self.candidate.horizontal)
+            suffix = self.__get_suffix(x, y, not self.candidate.horizontal)
 
             cross = '%s%s%s' % (prefix, bpos.letter, suffix)
             if len(cross) > 1:

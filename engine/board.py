@@ -21,7 +21,7 @@ default_board = [
 word_multipliers = {'#': 3, '@': 2, '*': 2, '.': 1}
 letter_multipliers = {'3': 3, '2': 2, '.': 1}
 
-empty_locations = ['#', '@', '.', '3', '2', '*']
+empty_locations = {'#', '@', '.', '3', '2', '*'}
 
 
 class BoardPosition(object):
