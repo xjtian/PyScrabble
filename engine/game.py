@@ -330,25 +330,58 @@ class ScrabbleGame(object):
         committed. Assumes board positions are already sorted in the
         candidate move.
         """
+        # TODO: 'zero-out' letter sets on occupied positions
+        fx, fy = self.candidate.positions[0].pos
+        lx, ly = self.candidate.positions[-1].pos
+
         move_word = ''.join([bp.letter for bp in self.candidate.positions])
-        x, y = self.candidate.positions[-1].pos
-        move_suffix = self.__get_suffix(x, y, self.candidate.horizontal)
-
-        x, y = self.candidate.positions[0].pos
-        move_prefix = self.__get_prefix(x, y, self.candidate.horizontal)
-
-        if self.candidate.horizontal:
-            if self.candidate.positions[0].pos[0] - len(move_prefix) > 0:
-                pass
+        move_suffix = self.__get_suffix(lx, ly, self.candidate.horizontal)
+        move_prefix = self.__get_prefix(fx, fy, self.candidate.horizontal)
+        word = move_word + move_suffix + move_prefix
 
         # Parallel letter sets off first/last letters in move
         # ---------------------------------------------------
-        word = move_word + move_suffix + move_prefix
-        left, right = gaddag.gaddag.cross_sets(word)
+        # Are these mid-sets?
 
-        # x, y already set above
-        fx, fy = x, y
-        lx, ly = self.candidate.positions[-1].pos
+        left_mid, right_mid = False, False
+
+        if self.candidate.horizontal:
+            mid_check = fy - len(move_prefix) - 2
+            if mid_check >= 0 and self.board[fx][mid_check] not in board.empty_locations:
+                left_mid = True
+
+                mid_prefix = self.__get_prefix(fx, mid_check + 1, True)
+                left = gaddag.gaddag.mid_set(mid_prefix, word)
+
+            mid_check = ly + len(move_suffix) + 2
+            if mid_check < len(self.board[lx]) and self.board[lx][mid_check] not in board.empty_locations:
+                right_mid = True
+
+                mid_suffix = self.__get_suffix(lx, mid_check - 1, True)
+                right = gaddag.gaddag.mid_set(word, mid_suffix)
+        else:
+            mid_check = fx - len(move_prefix) - 2
+            if mid_check >= 0 and self.board[mid_check][fy] not in board.empty_locations:
+                left_mid = True
+
+                mid_prefix = self.__get_prefix(mid_check + 1, fy, False)
+                left = gaddag.gaddag.mid_set(mid_prefix, word)
+
+            mid_check = lx + len(move_suffix) + 2
+            if mid_check < len(self.board) and self.board[mid_check][ly] not in board.empty_locations:
+                right_mid = True
+
+                mid_suffix = self.__get_suffix(mid_check - 1, ly, False)
+                right = gaddag.gaddag.mid_set(word, mid_suffix)
+
+        if left_mid and not right_mid:
+            _, right = gaddag.gaddag.cross_sets(word)
+        elif not left_mid and right_mid:
+            left, _ = gaddag.gaddag.cross_sets(word)
+        elif not left_mid and not right_mid:
+            left, right = gaddag.gaddag.cross_sets(word)
+
+        # TODO: check if these should be geq/leq or not
         if self.candidate.horizontal:
             if fy - len(move_prefix) > 0:
                 self.horizontal_crosses[fx][fy - len(move_prefix) - 1] = left
@@ -363,13 +396,24 @@ class ScrabbleGame(object):
         for bp in self.candidate.positions:
             x, y = bp.pos
 
-            # TODO: handle mid-crosses
             prefix = self.__get_prefix(x, y, not self.candidate.horizontal)
             suffix = self.__get_suffix(x, y, not self.candidate.horizontal)
 
+            # Are either of the cross sets mid-crosses?
+            left, right = self.__is_mid_cross(bp, prefix, suffix, self.candidate.horizontal)
+            left_mid = left is not None
+            right_mid = right is not None
+
             word = prefix + bp.letter + suffix
 
-            left, right = gaddag.gaddag.cross_sets(word)
+            if left_mid and not right_mid:
+                _, right = gaddag.gaddag.cross_sets(word)
+            elif not left_mid and right_mid:
+                left, _ = gaddag.gaddag.cross_sets(word)
+            elif not left_mid and not right_mid:
+                left, right = gaddag.gaddag.cross_sets(word)
+
+            # Assign the new cross-sets here
             if self.candidate.horizontal:
                 if x - len(prefix) > 0:
                     if self.board[x - len(prefix) - 1][y] in board.empty_locations:
@@ -386,6 +430,66 @@ class ScrabbleGame(object):
                 if y + len(suffix) < len(self.board[x]) - 1:
                     if self.board[x][y + len(suffix) + 1] in board.empty_locations:
                         self.horizontal_crosses[x][y + 1] = left
+
+    def __is_mid_cross(self, bp, prefix, suffix, horizontal):
+        """
+        Returns if the cross-set to be updated associated with the specified
+        grid location is a mid-cross or not. Returns the cross-set if it is
+        or None if it isn't.
+
+        Parameters:
+            bp:
+                BoardPosition of the letter of the move being tested.
+            prefix:
+                Prefix leading up to this position.
+            suffix:
+                Suffix leading up to this position.
+            horizontal:
+                Whether the candidate is horizontal or not. Note this
+                method will return the perpendicular cross-set to the value
+                of this parameter.
+
+        Returns:
+            (left_cross, right_cross):
+                None if there is no mid-cross associated with the position
+                and direction, or the cross-set if there is.
+        """
+        x, y = bp.pos
+        left_cross, right_cross = None, None
+
+        # Check coord - prefix length - 2 to determine if middle cross on left/above
+        # Check coord + suffix length + 2 to determine if middle cross on right/below
+        # TODO: check if these should be geq/leq or not
+        if horizontal:
+            mid_check = x - len(prefix) - 2
+            if mid_check > 0 and self.board[mid_check][y] not in board.empty_locations:
+                # The left (above) cross is a mid-cross
+                mid_prefix = self.__get_prefix(mid_check + 1, y, False)
+
+                left_cross = gaddag.gaddag.mid_set(mid_prefix, bp.letter + suffix)
+
+            mid_check = x + len(prefix) + 2
+            if mid_check < len(self.board) and self.board[mid_check][y] not in board.empty_locations:
+                # The right (below) cross is a mid-cross
+                mid_suffix = self.__get_suffix(mid_check - 1, y, False)
+
+                right_cross = gaddag.gaddag.mid_set(prefix + bp.letter, mid_suffix)
+        else:
+            mid_check = y - len(prefix) - 2
+            if mid_check > 0 and self.board[x][mid_check] not in board.empty_locations:
+                # The left cross is a mid-cross
+                mid_prefix = self.__get_prefix(x, mid_check + 1, True)
+
+                left_cross = gaddag.gaddag.mid_set(mid_prefix, bp.letter + suffix)
+
+            mid_check = y + len(prefix) + 2
+            if mid_check < len(self.board[x]) and self.board[x][mid_check] not in board.empty_locations:
+                # The right cross is a mid-cross
+                mid_suffix = self.__get_suffix(x, mid_check - 1, True)
+
+                right_cross = gaddag.gaddag.mid_set(prefix + bp.letter, mid_suffix)
+
+        return left_cross, right_cross
 
     def pass_turn(self):
         """
