@@ -337,46 +337,55 @@ class ScrabbleGame(object):
         x, y = self.candidate.positions[0].pos
         move_prefix = self.__get_prefix(x, y, self.candidate.horizontal)
 
-        for i, bp in enumerate(self.candidate.positions):
+        if self.candidate.horizontal:
+            if self.candidate.positions[0].pos[0] - len(move_prefix) > 0:
+                pass
+
+        # Parallel letter sets off first/last letters in move
+        # ---------------------------------------------------
+        word = move_word + move_suffix + move_prefix
+        left, right = gaddag.gaddag.cross_sets(word)
+
+        # x, y already set above
+        fx, fy = x, y
+        lx, ly = self.candidate.positions[-1].pos
+        if self.candidate.horizontal:
+            if fy - len(move_prefix) > 0:
+                self.horizontal_crosses[fx][fy - len(move_prefix) - 1] = left
+            if ly + len(move_suffix) < len(self.board[lx]) - 1:
+                self.horizontal_crosses[lx][ly + len(move_suffix) + 1] = right
+        else:
+            if fx - len(move_prefix) > 0:
+                self.vertical_crosses[fx - len(move_prefix) - 1][fy] = left
+            if lx + len(move_suffix) < len(self.board[lx]) - 1:
+                self.vertical_crosses[lx + len(move_suffix) + 1][ly] = right
+
+        for bp in self.candidate.positions:
             x, y = bp.pos
 
-            # Need to peek left/above off first letter (parallel)
-            # TODO: left and right parallel CS here for whole move
-            if i == 0:
-                if self.candidate.horizontal:
-                    if y > 0 and len(move_prefix) == 0:
-                        pass    # TODO: assign left CS here
-                else:
-                    if x > 0 and len(move_prefix) == 0:
-                        pass    # TODO: assign left CS here
+            # TODO: handle mid-crosses
+            prefix = self.__get_prefix(x, y, not self.candidate.horizontal)
+            suffix = self.__get_suffix(x, y, not self.candidate.horizontal)
 
-            # Need to peek right/below off last letter (parallel)
-            if i == len(self.candidate.positions) - 1:
-                if self.candidate.horizontal:
-                    if y < len(self.board[x]) - 1 and len(move_suffix) == 0:
-                        pass    # TODO: assign right CS here
-                else:
-                    if x < len(self.board) - 1 and len(move_suffix) == 0:
-                        pass    # TODO: assign right CS here
+            word = prefix + bp.letter + suffix
 
-            # Need to peek both directions perpendicular for all letters
-            # TODO: left and right CS here
+            left, right = gaddag.gaddag.cross_sets(word)
             if self.candidate.horizontal:
-                if x > 0:
-                    if self.board[x - 1][y] in board.empty_locations:
-                        pass    # TODO: assign left CS here
+                if x - len(prefix) > 0:
+                    if self.board[x - len(prefix) - 1][y] in board.empty_locations:
+                        self.vertical_crosses[x - 1][y] = left
 
-                if x < len(self.board) - 1:
-                    if self.board[x + 1][y] in board.empty_locations:
-                        pass    # TODO: assign right CS here
+                if x + len(suffix) < len(self.board) - 1:
+                    if self.board[x + len(suffix) + 1][y] in board.empty_locations:
+                        self.vertical_crosses[x + 1][y] = right
             else:
-                if y > 0:
-                    if self.board[x][y - 1] in board.empty_locations:
-                        pass    # TODO: assign left CS here
+                if y - len(prefix) > 0:
+                    if self.board[x][y - len(prefix) - 1] in board.empty_locations:
+                        self.horizontal_crosses[x][y - 1] = left
 
-                if y < len(self.board[x]) - 1:
-                    if self.board[x][y + 1] in board.empty_locations:
-                        pass    # TODO: assign right CS here
+                if y + len(suffix) < len(self.board[x]) - 1:
+                    if self.board[x][y + len(suffix) + 1] in board.empty_locations:
+                        self.horizontal_crosses[x][y + 1] = left
 
     def pass_turn(self):
         """
