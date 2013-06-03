@@ -59,17 +59,21 @@ def parse_scenario(filename):
             i += 1
             exp_score = int(lines[i])
 
-        i += 1
+        i += 1  # Increment before beginning of next iteration
         candidate = Move()
+        
+        offset = 0
         for j, letter in enumerate(candidate_letters):
             if candidate_dir:
-                x, y = candidate_pos[0], candidate_pos[1] + j
+                x, y = candidate_pos[0], candidate_pos[1] + j + offset
                 while y < len(board[x]) and board[x][y] not in empty_locations:
+                    offset += 1
                     y += 1
                 candidate.positions.append(BoardPosition(letter, (x, y)))
             else:
-                x, y = candidate_pos[0] + j, candidate_pos[1]
+                x, y = candidate_pos[0] + j + offset, candidate_pos[1]
                 while x < len(board) and board[x][y] not in empty_locations:
+                    offset += 1
                     x += 1
                 candidate.positions.append(BoardPosition(letter, (x, y)))
         candidate.horizontal = candidate_dir
