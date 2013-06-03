@@ -1,6 +1,8 @@
 __author__ = 'Jacky'
 
 import re
+from copy import deepcopy
+
 from engine.board import default_board, empty_locations
 from engine.move import BoardPosition, Move
 
@@ -24,7 +26,7 @@ def parse_scenario(filename):
             line = list(lines[i+1])
 
         if len(board) == 0:
-            board = default_board
+            board = deepcopy(default_board)
 
         i += 1
         candidate_letters = lines[i]
