@@ -11,7 +11,7 @@ def parse_scenario(filename):
     with open(filename, 'r') as f:
         lines = map(lambda s: s.rstrip(), f.readlines())
 
-    lines = filter(lambda s: len(s) > 0, lines)
+    lines = filter(lambda s: len(s) > 0 and not s.startswith('!:'), lines)
     i = 0
     while i < len(lines):
         line = lines[i]
@@ -61,7 +61,7 @@ def parse_scenario(filename):
 
         i += 1  # Increment before beginning of next iteration
         candidate = Move()
-        
+
         offset = 0
         for j, letter in enumerate(candidate_letters):
             if candidate_dir:
