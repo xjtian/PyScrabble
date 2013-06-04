@@ -22,8 +22,9 @@ def parse_scenario(filename):
         i += 1
         line = lines[i]
         while line != 'END BOARD':
-            board += line
-            line = list(lines[i+1])
+            board.append(list(line))
+            i += 1
+            line = lines[i]
 
         if len(board) == 0:
             board = deepcopy(default_board)
