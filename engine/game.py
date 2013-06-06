@@ -21,7 +21,7 @@ class StateNode(object):
 
 
 class ScrabbleGame(object):
-    def __init__(self, gaddag=False):
+    def __init__(self, read_gaddag=False):
         self.board = copy.deepcopy(board.default_board)
         self.bag = copy.deepcopy(letters.default_bag)
 
@@ -41,9 +41,11 @@ class ScrabbleGame(object):
         self.vertical_crosses = [[None] * len(row) for row in self.board]
         self.horizontal_crosses = [[None] * len(row) for row in self.board]
 
-        lexicon_set.read_lexicon(WORDLIST_PATH)
-        if gaddag:
-            gaddag.gaddag_from_file()
+        self.lexicon_set = lexicon_set.read_lexicon(WORDLIST_PATH)
+        self.gaddag = gaddag.Gaddag()
+
+        if read_gaddag:
+            self.gaddag = gaddag.gaddag_from_file()
 
     def current_player_info(self):
         """
@@ -351,11 +353,11 @@ class ScrabbleGame(object):
         right_mid = right is not None
 
         if left_mid and not right_mid:
-            _, right = gaddag.gaddag.cross_sets(word)
+            _, right = self.gaddag.cross_sets(word)
         elif not left_mid and right_mid:
-            left, _ = gaddag.gaddag.cross_sets(word)
+            left, _ = self.gaddag.cross_sets(word)
         elif not left_mid and not right_mid:
-            left, right = gaddag.gaddag.cross_sets(word)
+            left, right = self.gaddag.cross_sets(word)
 
         if self.candidate.horizontal:
             if fy - len(move_prefix) > 0:
@@ -382,11 +384,11 @@ class ScrabbleGame(object):
             word = prefix + bp.letter + suffix
 
             if left_mid and not right_mid:
-                _, right = gaddag.gaddag.cross_sets(word)
+                _, right = self.gaddag.cross_sets(word)
             elif not left_mid and right_mid:
-                left, _ = gaddag.gaddag.cross_sets(word)
+                left, _ = self.gaddag.cross_sets(word)
             elif not left_mid and not right_mid:
-                left, right = gaddag.gaddag.cross_sets(word)
+                left, right = self.gaddag.cross_sets(word)
 
             # Assign the new cross-sets here
             if self.candidate.horizontal:
@@ -442,28 +444,28 @@ class ScrabbleGame(object):
                 # The left (above) cross is a mid-cross
                 mid_prefix = self.__get_prefix(mid_check + 1, y, False)
 
-                left_cross = gaddag.gaddag.mid_set(mid_prefix, word)
+                left_cross = self.gaddag.mid_set(mid_prefix, word)
 
             mid_check = x + len(suffix) + 2
             if mid_check < len(self.board) and self.board[mid_check][y] not in board.empty_locations:
                 # The right (below) cross is a mid-cross
                 mid_suffix = self.__get_suffix(mid_check - 1, y, False)
 
-                right_cross = gaddag.gaddag.mid_set(word, mid_suffix)
+                right_cross = self.gaddag.mid_set(word, mid_suffix)
         else:
             mid_check = y - len(prefix) - 2
             if mid_check >= 0 and self.board[x][mid_check] not in board.empty_locations:
                 # The left cross is a mid-cross
                 mid_prefix = self.__get_prefix(x, mid_check + 1, True)
 
-                left_cross = gaddag.gaddag.mid_set(mid_prefix, word)
+                left_cross = self.gaddag.mid_set(mid_prefix, word)
 
             mid_check = y + len(suffix) + 2
             if mid_check < len(self.board[x]) and self.board[x][mid_check] not in board.empty_locations:
                 # The right cross is a mid-cross
                 mid_suffix = self.__get_suffix(x, mid_check - 1, True)
 
-                right_cross = gaddag.gaddag.mid_set(word, mid_suffix)
+                right_cross = self.gaddag.mid_set(word, mid_suffix)
 
         return left_cross, right_cross
 
