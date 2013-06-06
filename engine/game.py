@@ -167,8 +167,8 @@ class ScrabbleGame(object):
 
         # Make sure all letters are placed in-bounds
         for bp in self.candidate.positions:
-            if any([bp.pos[0] < 0, bp.pos[0] > len(self.board),
-                    bp.pos[1] < 0, bp.pos[1] > len(self.board[0])]):
+            if any([bp.pos[0] < 0, bp.pos[0] >= len(self.board),
+                    bp.pos[1] < 0, bp.pos[1] >= len(self.board[0])]):
                 return False
 
         # If it's the first turn, no need to hook for valid moves

@@ -99,19 +99,6 @@ class TestScrabbleGame(unittest.TestCase):
             self.game.candidate = None
             self.game.board = deepcopy(board.default_board)
 
-        # Try every way of putting 'HELLO' as the first move onto the board
-        pos = (7, 7)
-        for i, l in enumerate(hello):
-            self.game.set_candidate(hello, (pos[0], pos[1] - i), True)
-            self.assert_(self.game.validate_candidate())
-
-            clear_game()
-
-            self.game.set_candidate(hello, (pos[0] - i, pos[1]), False)
-            self.assert_(self.game.validate_candidate())
-
-            clear_game()
-
         # Drop-in replacement for testing openings using scenario tester
         self.__scenario_tester('./engine/test/scenarios/opening.txt')
 
