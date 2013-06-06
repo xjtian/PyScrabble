@@ -113,12 +113,12 @@ class TestScrabbleGame(unittest.TestCase):
             clear_game()
 
         # Drop-in replacement for testing openings using scenario tester
-        self.__scenario_tester('./engine/test/scenarios/test_opening.txt')
+        self.__scenario_tester('./engine/test/scenarios/opening.txt')
 
         clear_game()
 
         # Drop-in replacement for testing crosses using scenarios
-        self.__scenario_tester('./engine/test/scenarios/test_crosses.txt')
+        self.__scenario_tester('./engine/test/scenarios/crosses.txt')
 
         clear_game()
 
