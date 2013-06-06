@@ -1,0 +1,24 @@
+!: Prefix finder wrapped around the left edge of the board and
+!: added HUMVEE as the prefix for the move.
+BEGIN BOARD
+#..2...JILT2..#
+.@...Y...3OW.@.
+..@..OF.2.KIP..
+2..@.DIF.DENE.2
+....@.ZA.ID.A..
+.3...3.C.V..R3.
+..2...2aWA..L.G
+#..2...DON.C..R
+..2...YEN..O2.I
+.3...3O..3HE.UM
+....PLUG..AN.RE
+2..QI..R..BA.T2
+..@...2I2HUMVEE
+.@...3.O.3.O.X.
+#..2...ToLERATE
+END BOARD
+RASING
+12, 0
+H
+1
+30

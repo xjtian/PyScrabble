@@ -173,8 +173,8 @@ class ScrabbleGame(object):
 
         # Make sure all letters are placed in-bounds
         for bp in self.candidate.positions:
-            if any([bp.pos[0] < 0, bp.pos[0] > len(self.board),
-                    bp.pos[1] < 0, bp.pos[1] > len(self.board[0])]):
+            if any([bp.pos[0] < 0, bp.pos[0] >= len(self.board),
+                    bp.pos[1] < 0, bp.pos[1] >= len(self.board[0])]):
                 return False
 
         # If it's the first turn, no need to hook for valid moves
@@ -257,7 +257,7 @@ class ScrabbleGame(object):
         word = '%s%s%s' % (prefix, body, suffix)
 
         # Not a valid play
-        if word.upper() not in lexicon_set.global_set:
+        if word.upper() not in self.lexicon_set:
             return False
 
         # Bingo! - all 7 letters in rack used
@@ -510,14 +510,14 @@ class ScrabbleGame(object):
             try:
                 holder.append(rack.pop(rack.index(letter)))
             except ValueError:
-                rack += holder
+                self.players[self.current_turn].rack += holder
                 self.candidate = None
                 return False
 
         self.candidate.drawn = [
             self.bag.pop(random.randint(0, len(self.bag) - 1)) for _ in
             xrange(0, len(letters))]
-        rack += self.candidate.drawn
+        self.players[self.current_turn].rack += self.candidate.drawn
         self.bag += holder
 
         newstate = StateNode(self.candidate)
@@ -602,7 +602,7 @@ class ScrabbleGame(object):
 
             cross = '%s%s%s' % (prefix, bpos.letter, suffix)
             if len(cross) > 1:
-                if cross.upper() not in lexicon_set.global_set:
+                if cross.upper() not in self.lexicon_set:
                     return -1
 
                 crosses = 1

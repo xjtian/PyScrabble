@@ -159,33 +159,29 @@ class Gaddag(object):
         return letter_set
 
 
-gaddag = Gaddag()
-
-
-def gaddag_from_file():
+def gaddag_from_file(filename=WORDLIST_PATH):
     """
-    Create a GADDAG from a text file of a lexicon given by the WORDLIST_PATH
-    setting. The text file should only have the words in the lexicon, one per
-    line, with a blank line at the very end. The created GADDAG will be in the
-    'gaddag' module variable.
+    Create a GADDAG from a text file of a lexicon. If no filename is supplied
+    then it will default to the WORDLIST_PATH setting. The text file should
+    only have the words in the lexicon, one per line, with a blank line
+    at the very end. Returns the GADDAG.
     """
-    global gaddag
-    try:
-        with open(WORDLIST_PATH, 'r') as f:
-            for word in f.readlines():
-                gaddag.add_word(word[:-1])  # Chop the newline
-    except IOError:
-        pass
+    gaddag = Gaddag()
+    with open(filename, 'r') as f:
+        for word in f.readlines():
+            stripped = word.rstrip()
+            if len(stripped) > 1:
+                gaddag.add_word(stripped)  # Chop the newline
+
+    return gaddag
 
 
 def unpickle_gaddag():
     """
-    Unpickle a GADDAG from the GADDAG_PICKLE_PATH setting. The unpickled
-    GADDAG will be in the 'gaddag' module variable.
+    Unpickle a GADDAG from the GADDAG_PICKLE_PATH setting. Retunrs the
+    unpicked GADDAG.
     """
-    global gaddag
-    try:
-        with open(GADDAG_PICKLE_PATH, 'r') as f:
-            gaddag = Pickle.load(f)
-    except IOError:
-        pass
+    with open(GADDAG_PICKLE_PATH, 'r') as f:
+        gaddag = Pickle.load(f)
+
+    return gaddag

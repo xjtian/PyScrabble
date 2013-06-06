@@ -1,9 +1,11 @@
 __author__ = 'Jacky'
 
-global_set = {}
-
 
 def read_lexicon(filename):
-    global global_set
+    """
+    Read a lexicon from a file into a native Python set. Returns the set.
+    """
     with open(filename, 'r') as dictionary:
-        global_set = {word.strip() for word in dictionary.readlines()}
+        lex_set = {word.strip() for word in dictionary.readlines()}
+
+    return lex_set
