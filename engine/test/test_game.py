@@ -1,21 +1,19 @@
 __author__ = 'Jacky'
 
 import unittest
-from copy import deepcopy
 
 from collections import Counter
 
 from engine.game import ScrabbleGame, MoveTypes
-from engine import board
+from engine import board, move
 from engine.letters import default_bag
-from lexicon import lexicon_set
 
 from engine.test.scenario import parse_scenario
 
 
 class TestScrabbleGame(unittest.TestCase):
     def setUp(self):
-        self.game = ScrabbleGame()
+        self.game = ScrabbleGame('./engine/test/wordlists/wordlist1.txt')
 
     def test_add_player(self):
         self.assert_(self.game.add_player('Bob'))
@@ -51,6 +49,8 @@ class TestScrabbleGame(unittest.TestCase):
             self.assertEqual(bag_counter[l], check_counter[l])
 
     def test_set_candidate(self):
+        self.game = ScrabbleGame()
+
         self.game.add_player('Bob')
         self.game.players[0].rack = ['H', 'E', 'L', 'L', 'O', ' ', ' ']
 
@@ -90,31 +90,32 @@ class TestScrabbleGame(unittest.TestCase):
         self.assert_(not self.game.set_candidate('', (7, 7), True))
 
     def test_validate_candidate(self):
-        def clear_game():
-            self.game.candidate = None
-            self.game.board = deepcopy(board.default_board)
-
-        # Drop-in replacement for testing openings using scenario tester
+        # Testing openings
         self.__scenario_tester('./engine/test/scenarios/opening.txt')
-        clear_game()
 
-        # Drop-in replacement for testing crosses using scenarios
+        # Testing crosses
         self.__scenario_tester('./engine/test/scenarios/crosses.txt')
-        clear_game()
 
         # Testing parallel moves
         self.__scenario_tester('./engine/test/scenarios/parallel.txt')
-        clear_game()
 
         # Testing specific scenarios that came up in playtesting
-        self.__scenario_tester('./engine/test/scenarios/specific.txt', False)
+        self.game = ScrabbleGame()
+        self.__scenario_tester('./engine/test/scenarios/specific.txt')
 
     def test_remove_candidate(self):
         self.game.add_player('Bob')
         self.game.players[0].rack = ['H', 'E', 'L', 'L', 'O', ' ', ' ']
 
-        self.game.set_candidate('HELLO', (7, 7), True)
-        self.game.validate_candidate()
+        candidate = move.Move()
+        candidate.positions = [
+            (board.BoardPosition('A', (7, 7))),
+            (board.BoardPosition('B', (7, 8))),
+            (board.BoardPosition('C', (7, 9))),
+            (board.BoardPosition('D', (7, 10))),
+            (board.BoardPosition('E', (7, 11)))
+        ]
+        self.game.candidate = candidate
 
         self.game.remove_candidate()
         self.assertIsNone(self.game.candidate)
@@ -123,10 +124,19 @@ class TestScrabbleGame(unittest.TestCase):
 
     def test_commit_candidate(self):
         self.game.add_player('Bob')
-        self.game.players[0].rack = ['H', 'E', 'L', 'L', 'O', ' ', ' ']
+        self.game.players[0].rack = ['A', 'B', 'C', 'D', 'E']
+        self.game.bag = list('FFFFF')
 
-        self.game.set_candidate('HELLO', (7, 7), True)
-        self.game.validate_candidate()
+        candidate = move.Move()
+        candidate.positions = [
+            (board.BoardPosition('A', (7, 7))),
+            (board.BoardPosition('B', (7, 8))),
+            (board.BoardPosition('C', (7, 9))),
+            (board.BoardPosition('D', (7, 10))),
+            (board.BoardPosition('E', (7, 11)))
+        ]
+        candidate.score = 20
+        self.game.candidate = candidate
         self.game.commit_candidate()
 
         self.assertIsNone(self.game.candidate)
@@ -136,11 +146,10 @@ class TestScrabbleGame(unittest.TestCase):
         self.assertIsNone(self.game.history.previous)
 
         self.assertEqual(0, self.game.current_turn)
-        self.assertEqual(18, self.game.players[0].score)
+        self.assertEqual(20, self.game.players[0].score)
 
-        self.assertEqual(7, len(self.game.players[0].rack))
-        self.assertNotEqual(['H', 'E', 'L', 'L', 'O', ' ', ' '], self.game.players[0].rack)
-        self.assertEqual(len(default_bag) - 5, len(self.game.bag))
+        self.assertEqual(list('FFFFF'), self.game.players[0].rack)
+        self.assertEqual(0, len(self.game.bag))
 
     def test_pass_turn(self):
         self.game.add_player('Bob')
@@ -189,11 +198,7 @@ class TestScrabbleGame(unittest.TestCase):
         # Make sure that exchange works properly after a failed attempt
         self.assert_(self.game.exchange_tiles('AB'))
 
-    def __scenario_tester(self, filename, wordlist=True):
-        old_set = self.game.lexicon_set
-        if wordlist:
-            self.game.lexicon_set = lexicon_set.read_lexicon('./engine/test/wordlists/wordlist1.txt')
-
+    def __scenario_tester(self, filename):
         for exp_results in parse_scenario(filename):
             self.game.candidate = None
             self.game.board = exp_results['board']
@@ -209,5 +214,3 @@ class TestScrabbleGame(unittest.TestCase):
                 self.assertEquals(exp_results['score'], self.game.candidate.score)
             else:
                 self.assert_(not self.game.validate_candidate())
-
-        self.game.lexicon_set = old_set

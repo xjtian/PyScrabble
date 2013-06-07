@@ -21,7 +21,7 @@ class StateNode(object):
 
 
 class ScrabbleGame(object):
-    def __init__(self, read_gaddag=False):
+    def __init__(self, wordlist=WORDLIST_PATH, read_gaddag=False):
         self.board = copy.deepcopy(board.default_board)
         self.bag = copy.deepcopy(letters.default_bag)
 
@@ -41,11 +41,11 @@ class ScrabbleGame(object):
         self.vertical_crosses = [[None] * len(row) for row in self.board]
         self.horizontal_crosses = [[None] * len(row) for row in self.board]
 
-        self.lexicon_set = lexicon_set.read_lexicon(WORDLIST_PATH)
+        self.lexicon_set = lexicon_set.read_lexicon(wordlist)
         self.gaddag = gaddag.Gaddag()
 
         if read_gaddag:
-            self.gaddag = gaddag.gaddag_from_file()
+            self.gaddag = gaddag.gaddag_from_file(wordlist)
 
     def current_player_info(self):
         """
