@@ -332,9 +332,13 @@ class ScrabbleGame(object):
         committed. Assumes board positions are already sorted in the
         candidate move.
         """
-        # TODO: 'zero-out' letter sets on occupied positions
         fx, fy = self.candidate.positions[0].pos
         lx, ly = self.candidate.positions[-1].pos
+
+        for bpos in self.candidate.positions:
+            x, y = bpos.pos
+            self.horizontal_crosses[x][y] = set()
+            self.vertical_crosses[x][y] = set()
 
         move_word = ''.join([bp.letter for bp in self.candidate.positions])
         move_suffix = self.__get_suffix(lx, ly, self.candidate.horizontal)
