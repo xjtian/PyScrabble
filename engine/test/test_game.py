@@ -8,7 +8,7 @@ from engine.game import ScrabbleGame, MoveTypes
 from engine import board, move
 from engine.letters import default_bag
 
-from engine.test.scenario import parse_scenario
+from engine.test.scenario import parse_scenario, parse_cross_set
 
 
 class TestScrabbleGame(unittest.TestCase):
@@ -214,3 +214,27 @@ class TestScrabbleGame(unittest.TestCase):
                 self.assertEquals(exp_results['score'], self.game.candidate.score)
             else:
                 self.assert_(not self.game.validate_candidate())
+
+    def test_cross_sets(self):
+        for scenario in parse_cross_set('./engine/test/cross_sets/basic.txt'):
+            self.game.candidate = None
+            self.game.board = scenario['board']
+
+            if self.game.board == board.default_board:
+                self.game.history = None
+            else:
+                self.game.history = object()
+
+            self.game.candidate = scenario['candidate']
+            if self.game.validate_candidate():
+                self.game._redo_crosses()
+
+                for cross in scenario['crosses']:
+                    x, y = cross['x'], cross['y']
+                    if cross['horizontal']:
+                        self.assertEqual(cross['letters'], self.game.horizontal_crosses[x][y])
+                    else:
+                        self.assertEqual(cross['letters'], self.game.vertical_crosses[x][y])
+            else:
+                self.fail('Cross scenario move failed.')
+

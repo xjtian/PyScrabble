@@ -298,7 +298,7 @@ class ScrabbleGame(object):
         if self.game_over:
             return False
 
-        self.__redo_crosses()
+        self._redo_crosses()
 
         # Use the appropriate tiles from the rack
         self.players[self.current_turn].use_letters(
@@ -326,7 +326,7 @@ class ScrabbleGame(object):
 
         return True
 
-    def __redo_crosses(self):
+    def _redo_crosses(self):
         """
         Recalculate the cross sets for a candidate move that is going to be
         committed. Assumes board positions are already sorted in the

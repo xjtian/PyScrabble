@@ -1,0 +1,31 @@
+BEGIN BOARD
+END BOARD
+ABC
+7, 7
+H
+BEGIN CROSSES
+7, 6
+-
+DE
+6, 7
+|
+BCDE
+8, 7
+|
+BCDE
+6, 8
+|
+ACDE
+8, 8
+|
+ACDE
+6, 9
+|
+ABDE
+8, 9
+|
+ABDE
+7, 10
+-
+DE
+END CROSSES
