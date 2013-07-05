@@ -149,7 +149,10 @@ def parse_cross_set(filename):
 
             i += 1
             line = lines[i]
-            cross['letters'] = set(line)
+            if line == '/':
+                cross['letters'] = set()
+            else:
+                cross['letters'] = set(line)
 
             crosses.append(cross)
             i += 1
@@ -174,6 +177,7 @@ def parse_cross_set(filename):
         candidate.horizontal = candidate_dir
 
         yield {'board': board, 'candidate': candidate, 'crosses': crosses}
+        i += 1
 
 
 def main():

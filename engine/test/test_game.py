@@ -216,6 +216,7 @@ class TestScrabbleGame(unittest.TestCase):
                 self.assert_(not self.game.validate_candidate())
 
     def test_cross_sets(self):
+        self.game = ScrabbleGame('./engine/test/wordlists/wordlist1.txt', True)
         for scenario in parse_cross_set('./engine/test/cross_sets/basic.txt'):
             self.game.candidate = None
             self.game.board = scenario['board']
