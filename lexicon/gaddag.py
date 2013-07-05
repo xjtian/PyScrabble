@@ -140,12 +140,15 @@ class Gaddag(object):
         Returns:
             The middle crossing-set for the prefix and suffix.
         """
+        # Look for REV(word) in the GADDAG - easiest way to find mid cross
+        # Start by traversing reverse through the suffix
         cur_state = self.root
         for letter in suffix[::-1]:
             if not letter in cur_state.arcs:
                 return set()
             cur_state = cur_state.arcs[letter]
 
+        # Now for each arc exiting this state, check if the prefix is on it
         letter_set = set()
         for k, v in cur_state.arcs.iteritems():
             for letter in prefix[:0:-1]:
@@ -153,7 +156,8 @@ class Gaddag(object):
                     break
                 v = v.arcs[letter]
             else:
-                if prefix[0] in v.letter_set:
+                # Ignore delimiter: means it's not a REV(word) path
+                if prefix[0] in v.letter_set and k != '|':
                     letter_set.add(k)
 
         return letter_set

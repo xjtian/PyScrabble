@@ -352,7 +352,7 @@ class ScrabbleGame(object):
         mid_checker = self.candidate.positions[0]
         mid_suffix = move_word[1:] + move_suffix
 
-        left, right = self.__is_mid_cross(mid_checker, move_prefix, mid_suffix, self.candidate.horizontal)
+        left, right = self.__is_mid_cross(mid_checker, move_prefix, mid_suffix, not self.candidate.horizontal)
         left_mid = left is not None
         right_mid = right is not None
 
