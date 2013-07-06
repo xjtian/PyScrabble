@@ -2,9 +2,14 @@ __author__ = 'jacky'
 
 from string import letters
 from engine.game import ScrabbleGame
+from lexicon.lexicon_set import read_lexicon
+from lexicon.gaddag import gaddag_from_file
 
 game = ScrabbleGame()
 columns = letters[:len(game.board[0])].upper()
+
+# Test using the fake wordlist and bag?
+TEST = True
 
 
 def ignore_err(fn):
@@ -82,6 +87,14 @@ def get_move():
 
 
 def main():
+    if TEST:
+        WORDLIST = './engine/test/wordlists/wordlist1.txt'
+        game.lexicon_set = read_lexicon(WORDLIST)
+        game.gaddag = gaddag_from_file(WORDLIST)
+        game.bag = list('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'
+                        'CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD'
+                        'EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE')
+
     start_game()
     while not game.game_over:
         print_game()
