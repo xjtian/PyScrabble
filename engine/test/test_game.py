@@ -226,9 +226,9 @@ class TestScrabbleGame(unittest.TestCase):
             self.game.candidate = None
             self.game.board = scenario['board']
 
-            print 'Testing scenario in file %s' % filename
-            move_letters = ''.join([bp.letter for bp in scenario['candidate'].positions])
-            print 'Move candidate letters: %s' % move_letters
+            # print 'Testing scenario in file %s' % filename
+            # move_letters = ''.join([bp.letter for bp in scenario['candidate'].positions])
+            # print 'Move candidate letters: %s' % move_letters
 
             if self.game.board == board.default_board:
                 self.game.history = None
