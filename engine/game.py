@@ -340,7 +340,28 @@ class ScrabbleGame(object):
             self.horizontal_crosses[x][y] = set()
             self.vertical_crosses[x][y] = set()
 
-        move_word = ''.join([bp.letter for bp in self.candidate.positions])
+        # IMPORTANT: assumes move tiles are in sorted order already
+        # Build the main body of the move word - FIXED: include skipped
+        # board tiles as well
+        move_word = ''
+        i = 0
+        if self.candidate.horizontal:
+            for y in xrange(fy, ly + 1):
+                if self.board[fx][y] in board.empty_locations:
+                    move_word += self.candidate.positions[i].letter
+                    i += 1
+                else:
+                    move_word += self.board[fx][y]
+        else:
+            for x in xrange(fx, lx + 1):
+                if self.board[x][fy] in board.empty_locations:
+                    move_word += self.candidate.positions[i].letter
+                    i += 1
+                else:
+                    move_word += self.board[x][fy]
+
+        assert i == len(self.candidate.positions)
+
         move_suffix = self.__get_suffix(lx, ly, self.candidate.horizontal)
         move_prefix = self.__get_prefix(fx, fy, self.candidate.horizontal)
         word = move_word + move_suffix + move_prefix
