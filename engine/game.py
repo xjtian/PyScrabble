@@ -360,8 +360,6 @@ class ScrabbleGame(object):
                 else:
                     move_word += self.board[x][fy]
 
-        assert i == len(self.candidate.positions)
-
         move_suffix = self.__get_suffix(lx, ly, self.candidate.horizontal)
         move_prefix = self.__get_prefix(fx, fy, self.candidate.horizontal)
         word = move_word + move_suffix + move_prefix
@@ -419,19 +417,19 @@ class ScrabbleGame(object):
             if self.candidate.horizontal:
                 if x - len(prefix) > 0:
                     if self.board[x - len(prefix) - 1][y] in board.empty_locations:
-                        self.vertical_crosses[x - 1][y] = left
+                        self.vertical_crosses[x - len(prefix) - 1][y] = left
 
                 if x + len(suffix) < len(self.board) - 1:
                     if self.board[x + len(suffix) + 1][y] in board.empty_locations:
-                        self.vertical_crosses[x + 1][y] = right
+                        self.vertical_crosses[x + len(suffix) + 1][y] = right
             else:
                 if y - len(prefix) > 0:
                     if self.board[x][y - len(prefix) - 1] in board.empty_locations:
-                        self.horizontal_crosses[x][y - 1] = left
+                        self.horizontal_crosses[x][y - len(prefix) - 1] = left
 
                 if y + len(suffix) < len(self.board[x]) - 1:
                     if self.board[x][y + len(suffix) + 1] in board.empty_locations:
-                        self.horizontal_crosses[x][y + 1] = left
+                        self.horizontal_crosses[x][y + len(suffix) + 1] = left
 
     def __is_mid_cross(self, bp, prefix, suffix, horizontal):
         """

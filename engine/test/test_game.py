@@ -218,6 +218,7 @@ class TestScrabbleGame(unittest.TestCase):
     def test_cross_sets(self):
         self.__cross_tester('./engine/test/cross_sets/basic.txt')
         self.__cross_tester('./engine/test/cross_sets/mids.txt')
+        self.__cross_tester('./engine/test/cross_sets/specific.txt')
 
     def __cross_tester(self, filename):
         self.game = ScrabbleGame('./engine/test/wordlists/wordlist1.txt', True)
