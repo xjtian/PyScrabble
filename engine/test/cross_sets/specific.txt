@@ -34,3 +34,39 @@ CDE
 CDE
 
 END CROSSES
+
+!: The mid cross on 9, 6 isn't correct.
+!: Note this only happened when the 1-letter move was played vertically.
+
+BEGIN BOARD
+#..2...#...2..#
+.@...3...3...@.
+..@...2.2...@..
+2..@...2...@..2
+....@.....@....
+.3...3...3...3.
+..2...2ECA..2..
+#..2...ABCDE..#
+..2..ACDEB.A2..
+.3...3.BAD.CABE
+....@...D.@....
+2..@...2...@..2
+..@...2.2...@..
+.@...3...3...@.
+#..2...#...2..#
+END BOARD
+C
+9, 5
+V
+
+BEGIN CROSSES
+
+9, 4
+-
+ABDE
+
+9, 6
+-
+E
+
+END CROSSES

@@ -439,7 +439,7 @@ class ScrabbleGame(object):
 
                 if y + len(suffix) < len(self.board[x]) - 1:
                     if self.board[x][y + len(suffix) + 1] in board.empty_locations:
-                        self.horizontal_crosses[x][y + len(suffix) + 1] = left
+                        self.horizontal_crosses[x][y + len(suffix) + 1] = right
 
     def __is_mid_cross(self, bp, prefix, suffix, horizontal):
         """
