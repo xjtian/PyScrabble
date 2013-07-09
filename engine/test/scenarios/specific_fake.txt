@@ -1,0 +1,26 @@
+!: Specific buggy scenarios encountered playing with mock wordlist.
+!: Wasn't allowed to play this move horizontally, but vertically worked. Why?
+
+BEGIN BOARD
+#..2...#...2..#
+.@...3...3...@.
+..@...2.2...@..
+2..@...2...@..2
+....@.....@....
+.3...3...3...3.
+..2...2ECA..2..
+#..2...ABCDE..#
+..2..ACDEB.A2..
+.3...3.BAD.CABE
+....@...D.@....
+2..@...2...@..2
+..@...2.2...@..
+.@...3...3...@.
+#..2...#...2..#
+END BOARD
+C
+9, 5
+H
+1
+10
+

@@ -258,9 +258,19 @@ class ScrabbleGame(object):
                 [self.board[x + i][y] for i in xrange(0, lx - x + 1)])
         word = '%s%s%s' % (prefix, body, suffix)
 
-        # Not a valid play
-        if word.upper() not in self.lexicon_set:
+        # Not a valid play - if 1-letter play, validity depends on crosses
+        if len(word) > 1 and word.upper() not in self.lexicon_set:
             return False
+
+        # 1-letter play on first move is invalid
+        if len(word) == 1 and self.history is None:
+            return False
+
+        # If this is a single-letter play and not hooked in any way, it
+        # shouldn't be scored in this direction. Score comes solely from
+        # cross(es).
+        if len(word) == 1 and not hooked:
+            self.candidate.score = 0
 
         # Bingo! - all 7 letters in rack used
         if len(self.candidate.positions) >= 7:
@@ -268,7 +278,7 @@ class ScrabbleGame(object):
 
         cross = self.__check_crosses()
         if not cross:
-            return hooked
+            return hooked and len(word) > 1
         elif cross == -1:
             return False
         elif cross == 1:

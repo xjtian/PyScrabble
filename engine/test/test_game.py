@@ -99,6 +99,8 @@ class TestScrabbleGame(unittest.TestCase):
         # Testing parallel moves
         self.__scenario_tester('./engine/test/scenarios/parallel.txt')
 
+        self.__scenario_tester('./engine/test/scenarios/specific_fake.txt')
+
         # Testing specific scenarios that came up in playtesting
         self.game = ScrabbleGame()
         self.__scenario_tester('./engine/test/scenarios/specific.txt')
