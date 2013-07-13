@@ -216,34 +216,3 @@ class TestScrabbleGame(unittest.TestCase):
                 self.assertEquals(exp_results['score'], self.game.candidate.score)
             else:
                 self.assert_(not self.game.validate_candidate())
-
-    def test_cross_sets(self):
-        self.__cross_tester('./engine/test/cross_sets/basic.txt')
-        self.__cross_tester('./engine/test/cross_sets/mids.txt')
-        self.__cross_tester('./engine/test/cross_sets/specific.txt')
-
-    def __cross_tester(self, filename):
-        self.game = ScrabbleGame('./engine/test/wordlists/wordlist1.txt', True)
-
-        for scenario in parse_cross_set(filename):
-            self.game.candidate = None
-            self.game.board = scenario['board']
-
-            # print 'Testing scenario in file %s' % filename
-            # move_letters = ''.join([bp.letter for bp in scenario['candidate'].positions])
-            # print 'Move candidate letters: %s' % move_letters
-
-            if self.game.board == board.default_board:
-                self.game.history = None
-            else:
-                self.game.history = object()
-
-            self.game.candidate = scenario['candidate']
-            self.game._redo_crosses()
-
-            for cross in scenario['crosses']:
-                x, y = cross['x'], cross['y']
-                if cross['horizontal']:
-                    self.assertEqual(cross['letters'], self.game.horizontal_crosses[x][y])
-                else:
-                    self.assertEqual(cross['letters'], self.game.vertical_crosses[x][y])
