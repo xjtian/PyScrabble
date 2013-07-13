@@ -13,7 +13,7 @@ from engine.test.scenario import parse_scenario, parse_cross_set
 
 class TestScrabbleGame(unittest.TestCase):
     def setUp(self):
-        self.game = ScrabbleGame('./engine/test/wordlists/wordlist1.txt')
+        self.game = ScrabbleGame('./wordlists/test_list1.txt')
 
     def test_add_player(self):
         self.assert_(self.game.add_player('Bob'))

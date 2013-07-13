@@ -10,7 +10,7 @@ from strategy.test.scenario import parse_cross_set
 
 class TestCrossSets(unittest.TestCase):
     def setUp(self):
-        self.gaddag = gaddag_from_file('./engine/test/wordlists/wordlist1.txt')
+        self.gaddag = gaddag_from_file('./wordlists/test_list1.txt')
 
     def test_cases(self):
         self.__scenario_tester('./strategy/test/scenarios/basic.txt')
