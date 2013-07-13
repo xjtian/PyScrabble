@@ -230,10 +230,10 @@ class ScrabbleGame(object):
             lx, ly = x, y
 
         x, y = self.candidate.positions[0].pos
-        prefix = self.__get_prefix(x, y, self.candidate.horizontal)
+        prefix = board.get_prefix(self.board, x, y, self.candidate.horizontal)
 
         x, y = self.candidate.positions[-1].pos
-        suffix = self.__get_suffix(x, y, self.candidate.horizontal)
+        suffix = board.get_suffix(self.board, x, y, self.candidate.horizontal)
 
         # Bridging also counts as hooking
         hooked |= bool(prefix) or bool(suffix)
@@ -370,8 +370,8 @@ class ScrabbleGame(object):
                 else:
                     move_word += self.board[x][fy]
 
-        move_suffix = self.__get_suffix(lx, ly, self.candidate.horizontal)
-        move_prefix = self.__get_prefix(fx, fy, self.candidate.horizontal)
+        move_suffix = board.get_suffix(self.board, lx, ly, self.candidate.horizontal)
+        move_prefix = board.get_prefix(self.board, fx, fy, self.candidate.horizontal)
         word = move_word + move_suffix + move_prefix
 
         # Parallel letter sets off first/last letters in move
@@ -406,8 +406,8 @@ class ScrabbleGame(object):
         for bp in self.candidate.positions:
             x, y = bp.pos
 
-            prefix = self.__get_prefix(x, y, not self.candidate.horizontal)
-            suffix = self.__get_suffix(x, y, not self.candidate.horizontal)
+            prefix = board.get_prefix(self.board, x, y, not self.candidate.horizontal)
+            suffix = board.get_suffix(self.board, x, y, not self.candidate.horizontal)
 
             # Are either of the cross sets mid-crosses?
             left, right = self.__is_mid_cross(bp, prefix, suffix, self.candidate.horizontal)
@@ -475,28 +475,28 @@ class ScrabbleGame(object):
             mid_check = x - len(prefix) - 2
             if mid_check >= 0 and self.board[mid_check][y] not in board.empty_locations:
                 # The left (above) cross is a mid-cross
-                mid_prefix = self.__get_prefix(mid_check + 1, y, False)
+                mid_prefix = board.get_prefix(self.board, mid_check + 1, y, False)
 
                 left_cross = self.gaddag.mid_set(mid_prefix, word)
 
             mid_check = x + len(suffix) + 2
             if mid_check < len(self.board) and self.board[mid_check][y] not in board.empty_locations:
                 # The right (below) cross is a mid-cross
-                mid_suffix = self.__get_suffix(mid_check - 1, y, False)
+                mid_suffix = board.get_suffix(self.board, mid_check - 1, y, False)
 
                 right_cross = self.gaddag.mid_set(word, mid_suffix)
         else:
             mid_check = y - len(prefix) - 2
             if mid_check >= 0 and self.board[x][mid_check] not in board.empty_locations:
                 # The left cross is a mid-cross
-                mid_prefix = self.__get_prefix(x, mid_check + 1, True)
+                mid_prefix = board.get_prefix(self.board, x, mid_check + 1, True)
 
                 left_cross = self.gaddag.mid_set(mid_prefix, word)
 
             mid_check = y + len(suffix) + 2
             if mid_check < len(self.board[x]) and self.board[x][mid_check] not in board.empty_locations:
                 # The right cross is a mid-cross
-                mid_suffix = self.__get_suffix(x, mid_check - 1, True)
+                mid_suffix = board.get_suffix(self.board, x, mid_check - 1, True)
 
                 right_cross = self.gaddag.mid_set(word, mid_suffix)
 
@@ -632,8 +632,8 @@ class ScrabbleGame(object):
         crosses = 0
         for bpos in self.candidate.positions:
             x, y = bpos.pos
-            prefix = self.__get_prefix(x, y, not self.candidate.horizontal)
-            suffix = self.__get_suffix(x, y, not self.candidate.horizontal)
+            prefix = board.get_prefix(self.board, x, y, not self.candidate.horizontal)
+            suffix = board.get_suffix(self.board, x, y, not self.candidate.horizontal)
 
             cross = '%s%s%s' % (prefix, bpos.letter, suffix)
             if len(cross) > 1:
