@@ -1,7 +1,7 @@
 __author__ = 'Jacky'
 
 import unittest
-from engine.board import default_board, empty_locations
+from engine.board import *
 
 
 class TestBoard(unittest.TestCase):
@@ -14,3 +14,89 @@ class TestBoard(unittest.TestCase):
         for row in default_board:
             for letter in row:
                 self.assertIn(letter, empty_locations)
+
+
+class TestPrefixSuffix(unittest.TestCase):
+    def setUp(self):
+        self.board = [
+            list('.....'),
+            list('.....'),
+            list('.....'),
+            list('.....'),
+            list('.....')
+        ]
+
+    def test_get_prefix(self):
+        # No prefix
+        board = [
+            list('..B..'),
+            list('.....'),
+            list('B.A.B'),
+            list('.....'),
+            list('..B..')
+        ]
+
+        self.assertEqual('', get_prefix(board, 2, 2, True))
+        self.assertEqual('', get_prefix(board, 2, 2, False))
+
+        # Simple prefix
+        board = [
+            list('.....'),
+            list('...B.'),
+            list('...B.'),
+            list('.BBA.'),
+            list('.....')
+        ]
+
+        self.assertEqual('BB', get_prefix(board, 3, 3, True))
+        self.assertEqual('BB', get_prefix(board, 3, 3, False))
+
+        # Prefix all the way to end of board and around
+        board = [
+            list('..B..'),
+            list('..B..'),
+            list('BBA.B'),
+            list('.....'),
+            list('..B..')
+        ]
+
+        self.assertEqual('BB', get_prefix(board, 2, 2, True))
+        self.assertEqual('BB', get_prefix(board, 2, 2, False))
+
+    def test_get_suffix(self):
+        # No suffix
+        board = [
+            list('..B..'),
+            list('.....'),
+            list('B.A.B'),
+            list('.....'),
+            list('..B..')
+        ]
+
+        self.assertEqual('', get_suffix(board, 2, 2, True))
+        self.assertEqual('', get_suffix(board, 2, 2, False))
+
+        # Simple suffix
+        board = [
+            list('.....'),
+            list('.ABB.'),
+            list('.B...'),
+            list('.B...'),
+            list('.....')
+        ]
+
+        self.assertEqual('BB', get_suffix(board, 1, 1, True))
+        self.assertEqual('BB', get_suffix(board, 1, 1, False))
+
+        # Suffix all the way to end of board and around
+        board = [
+            list('..B..'),
+            list('.....'),
+            list('B.ABB'),
+            list('..B..'),
+            list('..B..')
+        ]
+
+        self.assertEqual('BB', get_suffix(board, 2, 2, True))
+        self.assertEqual('BB', get_suffix(board, 2, 2, False))
+

@@ -90,7 +90,8 @@ def __pre_suff_helper(s_board, x, y, horizontal, pre):
     while l not in empty_locations:
         sub.append(l)
         i += -1 if pre else 1
-        if y + i >= len(s_board[x]) if horizontal else x + i >= len(s_board):
+        if (y + i >= len(s_board[x]) if horizontal else x + i >= len(s_board))\
+                or (y + i < 0 if horizontal else x + i < 0):
             break
         l = s_board[x][y + i] if horizontal else s_board[x + i][y]
 
