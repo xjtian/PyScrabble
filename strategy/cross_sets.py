@@ -143,9 +143,7 @@ def mid_cross(bp, prefix, suffix, horizontal, s_board, gaddag):
         suffix:
             Suffix leading up to this position.
         horizontal:
-            Whether the candidate is horizontal or not. Note this
-            method will return the perpendicular cross-set to the value
-            of this parameter.
+            Look for horizontal or vertical cross sets (opposite... TODO: fix this).
         board:
             The board to generate the cross sets for.
         gaddag:
