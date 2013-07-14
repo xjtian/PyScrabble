@@ -87,9 +87,13 @@ class TestGaddag(unittest.TestCase):
         self.assertEqual(set(), left)
         self.assertEqual({self.word[-1]}, right)
 
+        self.assertEqual((set(), set()), self.gaddag.cross_sets('ZZZZ'))
+
     def test_mid_set(self):
         self.gaddag.add_word(self.word)
 
         for i in xrange(1, len(self.word) - 1):
             s = self.gaddag.mid_set(self.word[0:i], self.word[i+1:])
             self.assertEqual({self.word[i]}, s)
+
+        self.assertEqual(set(), self.gaddag.mid_set('ZZZ', 'ZZZ'))

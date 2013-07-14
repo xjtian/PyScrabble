@@ -178,14 +178,3 @@ def gaddag_from_file(filename=WORDLIST_PATH):
                 gaddag.add_word(stripped)  # Chop the newline
 
     return gaddag
-
-
-def unpickle_gaddag():
-    """
-    Unpickle a GADDAG from the GADDAG_PICKLE_PATH setting. Retunrs the
-    unpicked GADDAG.
-    """
-    with open(GADDAG_PICKLE_PATH, 'r') as f:
-        gaddag = Pickle.load(f)
-
-    return gaddag
