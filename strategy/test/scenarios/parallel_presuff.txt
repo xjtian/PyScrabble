@@ -1,0 +1,318 @@
+!: Doesn't cross existing tiles
+BEGIN BOARD
+....
+END BOARD
+AB
+0, 1
+H
+
+BEGIN CROSSES
+0, 0
+-
+CDE
+
+0, 3
+-
+CDE
+END CROSSES
+
+BEGIN BOARD
+.
+.
+.
+.
+END BOARD
+AB
+1, 0
+V
+
+BEGIN CROSSES
+0, 0
+|
+CDE
+
+3, 0
+|
+CDE
+END CROSSES
+
+!: Crosses existing tiles
+BEGIN BOARD
+..BC..
+END BOARD
+AD
+0, 1
+H
+
+BEGIN CROSSES
+0, 0
+-
+E
+
+0, 5
+-
+E
+END CROSSES
+
+BEGIN BOARD
+.
+.
+B
+C
+.
+.
+END BOARD
+AD
+1, 0
+V
+
+BEGIN CROSSES
+0, 0
+|
+E
+
+5, 0
+|
+E
+END CROSSES
+
+!: Doesn't cross existing tiles, hooks prefix
+BEGIN BOARD
+.AB...
+END BOARD
+CD
+0, 3
+H
+
+BEGIN CROSSES
+0, 0
+-
+E
+
+0, 5
+-
+E
+END CROSSES
+
+BEGIN BOARD
+.
+A
+B
+.
+.
+.
+END BOARD
+CD
+3, 0
+V
+
+BEGIN CROSSES
+0, 0
+|
+E
+
+5, 0
+|
+E
+END CROSSES
+
+!: Doesn't cross existing tiles, hooks suffix
+BEGIN BOARD
+...CD.
+END BOARD
+AB
+0, 1
+H
+
+BEGIN CROSSES
+0, 0
+-
+E
+
+0, 5
+-
+E
+END CROSSES
+
+BEGIN BOARD
+.
+.
+.
+C
+D
+.
+END BOARD
+AB
+1, 0
+V
+
+BEGIN CROSSES
+0, 0
+|
+E
+
+5, 0
+|
+E
+END CROSSES
+
+!: Doesn't cross existing tiles, hooks prefix and suffix
+BEGIN BOARD
+.A..D.
+END BOARD
+BC
+0, 2
+H
+
+BEGIN CROSSES
+0, 0
+-
+E
+
+0, 5
+-
+E
+END CROSSES
+
+BEGIN BOARD
+.
+A
+.
+.
+D
+.
+END BOARD
+BC
+2, 0
+V
+
+BEGIN CROSSES
+0, 0
+|
+E
+
+5, 0
+|
+E
+END CROSSES
+
+!: Crosses existing tiles, hooks prefix
+BEGIN BOARD
+.A.C..
+END BOARD
+BD
+0, 2
+H
+
+BEGIN CROSSES
+0, 0
+-
+E
+
+0, 5
+-
+E
+END CROSSES
+
+BEGIN BOARD
+.
+A
+.
+C
+.
+.
+END BOARD
+BD
+2, 0
+V
+
+BEGIN CROSSES
+0, 0
+|
+E
+
+5, 0
+|
+E
+END CROSSES
+
+!: Crosses existing tiles, hooks suffix
+BEGIN BOARD
+..B.D.
+END BOARD
+AC
+0, 1
+H
+
+BEGIN CROSSES
+0, 0
+-
+E
+
+0, 5
+-
+E
+END CROSSES
+
+BEGIN BOARD
+.
+.
+B
+.
+D
+.
+END BOARD
+AC
+1, 0
+V
+
+BEGIN CROSSES
+0, 0
+|
+E
+
+5, 0
+|
+E
+END CROSSES
+
+!: Crosses existing tiles, hooks prefix and suffix
+BEGIN BOARD
+.A.C.E.
+END BOARD
+BD
+0, 2
+H
+
+BEGIN CROSSES
+0, 0
+-
+/
+
+0, 6
+-
+/
+END CROSSES
+
+BEGIN BOARD
+.
+A
+.
+C
+.
+E
+.
+END BOARD
+BD
+2, 0
+V
+
+BEGIN CROSSES
+0, 0
+|
+/
+
+6, 0
+|
+/
+END CROSSES
