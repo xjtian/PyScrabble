@@ -216,6 +216,272 @@ END CROSSES
 
 !: Prefix, both mid
 BEGIN BOARD
+A.B...E
+END BOARD
+CD
+0, 3
+H
+
+BEGIN CROSSES
+
+0, 1
+-
+E
+
+0, 5
+-
+A
+
+END CROSSES
+
+BEGIN BOARD
+A
+.
+B
+.
+.
+.
+E
+END BOARD
+CD
+3, 0
+V
+
+BEGIN CROSSES
+
+1, 0
+|
+E
+
+5, 0
+|
+A
+
+END CROSSES
+
+!: Suffix, left mid
+BEGIN BOARD
+A...D.
+END BOARD
+BC
+0, 2
+H
+
+BEGIN CROSSES
+
+0, 1
+-
+E
+
+0, 5
+-
+AE
+
+END CROSSES
+
+BEGIN BOARD
+A
+.
+.
+.
+D
+.
+END BOARD
+BC
+2, 0
+V
+
+BEGIN CROSSES
+
+1, 0
+|
+E
+
+5, 0
+|
+AE
+
+END CROSSES
+
+!: Suffix, right mid
+BEGIN BOARD
+...C.D
+END BOARD
+AB
+0, 1
+H
+
+BEGIN CROSSES
+
+0, 0
+-
+DE
+
+0, 4
+-
+E
+
+END CROSSES
+
+BEGIN BOARD
+.
+.
+.
+C
+.
+D
+END BOARD
+AB
+1, 0
+V
+
+BEGIN CROSSES
+
+0, 0
+|
+DE
+
+4, 0
+|
+E
+
+END CROSSES
+
+!: Suffix, both mid
+BEGIN BOARD
+A...D.E
+END BOARD
+BC
+0, 2
+H
+
+BEGIN CROSSES
+
+0, 1
+-
+E
+
+0, 5
+-
+A
+
+END CROSSES
+
+BEGIN BOARD
+A
+.
+.
+.
+D
+.
+E
+END BOARD
+BC
+2, 0
+V
+
+BEGIN CROSSES
+
+1, 0
+|
+E
+
+5, 0
+|
+A
+
+END CROSSES
+
+!: Prefix and suffix, left mid
+BEGIN BOARD
+A.B.D.
+END BOARD
+C
+0, 3
+H
+
+BEGIN CROSSES
+
+0, 1
+-
+E
+
+0, 5
+-
+AE
+
+END CROSSES
+
+BEGIN BOARD
+A
+.
+B
+.
+D
+.
+END BOARD
+C
+3, 0
+V
+
+BEGIN CROSSES
+
+1, 0
+|
+E
+
+5, 0
+|
+AE
+
+END CROSSES
+
+!: Prefix and suffix, right mid
+BEGIN BOARD
+.A.C.D
+END BOARD
+B
+0, 2
+H
+
+BEGIN CROSSES
+
+0, 0
+-
+DE
+
+0, 4
+-
+E
+
+END CROSSES
+
+BEGIN BOARD
+.
+A
+.
+C
+.
+D
+END BOARD
+B
+2, 0
+V
+
+BEGIN CROSSES
+
+0, 0
+|
+DE
+
+4, 0
+|
+E
+
+END CROSSES
+
+!: Prefix and suffix, both mid
+BEGIN BOARD
 A.B.D.E
 END BOARD
 C
@@ -258,5 +524,3 @@ E
 A
 
 END CROSSES
-
-!: Suffix, left mid

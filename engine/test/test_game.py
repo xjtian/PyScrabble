@@ -8,7 +8,7 @@ from engine.game import ScrabbleGame, MoveTypes
 from engine import board, move
 from engine.letters import default_bag
 
-from engine.test.scenario import parse_scenario, parse_cross_set
+from engine.test.scenario import parse_scenario
 
 
 class TestScrabbleGame(unittest.TestCase):
