@@ -1,0 +1,235 @@
+!: Plain move
+BEGIN BOARD
+..
+..
+..
+END BOARD
+AB
+1, 0
+H
+
+BEGIN CROSSES
+
+0, 0
+|
+BCDE
+
+2, 0
+|
+BCDE
+
+0, 1
+|
+ACDE
+
+2, 1
+|
+ACDE
+
+END CROSSES
+
+BEGIN BOARD
+...
+...
+END BOARD
+AB
+0, 1
+V
+
+BEGIN CROSSES
+
+0, 0
+-
+BCDE
+
+0, 2
+-
+BCDE
+
+1, 0
+-
+ACDE
+
+1, 2
+-
+ACDE
+
+END CROSSES
+
+!: Prefix
+BEGIN BOARD
+..
+CD
+..
+..
+END BOARD
+AB
+2, 0
+H
+
+BEGIN CROSSES
+
+0, 0
+|
+BDE
+
+3, 0
+|
+BDE
+
+0, 1
+|
+ACE
+
+3, 1
+|
+ACE
+
+END CROSSES
+
+BEGIN BOARD
+.C..
+.D..
+END BOARD
+AB
+0, 2
+V
+
+BEGIN CROSSES
+
+0, 0
+-
+BDE
+
+0, 3
+-
+BDE
+
+1, 0
+-
+ACE
+
+1, 3
+-
+ACE
+
+END CROSSES
+
+!: Suffix
+BEGIN BOARD
+..
+..
+CD
+..
+END BOARD
+AB
+1, 0
+H
+
+BEGIN CROSSES
+
+0, 0
+|
+BDE
+
+3, 0
+|
+BDE
+
+0, 1
+|
+ACE
+
+3, 1
+|
+ACE
+
+END CROSSES
+
+BEGIN BOARD
+..C.
+..D.
+END BOARD
+AB
+0, 1
+V
+
+BEGIN CROSSES
+
+0, 0
+-
+BDE
+
+0, 3
+-
+BDE
+
+1, 0
+-
+ACE
+
+1, 3
+-
+ACE
+
+END CROSSES
+
+!: Prefix and suffix
+BEGIN BOARD
+..
+AE
+..
+CC
+..
+END BOARD
+BD
+2, 0
+H
+
+BEGIN CROSSES
+
+0, 0
+|
+DE
+
+4, 0
+|
+DE
+
+0, 1
+|
+AB
+
+4, 1
+|
+AB
+
+END CROSSES
+
+BEGIN BOARD
+.A.C.
+.E.C.
+END BOARD
+BD
+0, 2
+V
+
+BEGIN CROSSES
+
+0, 0
+-
+DE
+
+0, 4
+-
+DE
+
+1, 0
+-
+AB
+
+1, 4
+-
+AB
+
+END CROSSES

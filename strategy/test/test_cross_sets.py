@@ -19,6 +19,7 @@ class TestCrossSets(unittest.TestCase):
         self.__scenario_tester('./strategy/test/scenarios/specific.txt')
         self.__scenario_tester('./strategy/test/scenarios/parallel_presuff.txt')
         self.__scenario_tester('./strategy/test/scenarios/parallel_mids.txt')
+        self.__scenario_tester('./strategy/test/scenarios/presuff.txt')
 
     def __scenario_tester(self, filename):
         for scenario in parse_cross_set(filename):
