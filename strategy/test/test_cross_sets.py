@@ -14,7 +14,6 @@ class TestCrossSets(unittest.TestCase):
         self.gaddag = gaddag_from_file('./wordlists/test_list1.txt')
 
     def test_cases(self):
-        self.__scenario_tester('./strategy/test/scenarios/basic.txt')
         self.__scenario_tester('./strategy/test/scenarios/mids.txt')
         self.__scenario_tester('./strategy/test/scenarios/specific.txt')
         self.__scenario_tester('./strategy/test/scenarios/parallel_presuff.txt')
