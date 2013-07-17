@@ -1,0 +1,262 @@
+!: Left is mid cross
+BEGIN BOARD
+.A....
+END BOARD
+BC
+0, 3
+H
+
+BEGIN CROSSES
+
+0, 2
+-
+DE
+
+0, 5
+-
+ADE
+
+END CROSSES
+
+BEGIN BOARD
+A
+.
+.
+.
+.
+END BOARD
+BC
+2, 0
+V
+
+BEGIN CROSSES
+
+1, 0
+|
+DE
+
+4, 0
+|
+ADE
+
+END CROSSES
+
+!: Right is mid cross
+BEGIN BOARD
+....C.
+END BOARD
+AB
+0, 1
+H
+
+BEGIN CROSSES
+
+0, 0
+-
+CDE
+
+0, 3
+-
+DE
+
+END CROSSES
+
+BEGIN BOARD
+.
+.
+.
+.
+C
+END BOARD
+AB
+1, 0
+V
+
+BEGIN CROSSES
+
+0, 0
+|
+CDE
+
+3, 0
+|
+DE
+
+END CROSSES
+
+!: Both sides mid cross
+BEGIN BOARD
+A....D
+END BOARD
+BC
+0, 2
+H
+
+BEGIN CROSSES
+
+0, 1
+-
+DE
+
+0, 4
+-
+AE
+
+END CROSSES
+
+BEGIN BOARD
+A
+.
+.
+.
+.
+D
+END BOARD
+BC
+2, 0
+V
+
+BEGIN CROSSES
+
+1, 0
+|
+DE
+
+4, 0
+|
+AE
+
+END CROSSES
+
+!: Prefix, left mid
+BEGIN BOARD
+A.B...
+END BOARD
+CD
+0, 3
+H
+
+BEGIN CROSSES
+
+0, 1
+-
+E
+
+0, 5
+-
+AE
+
+END CROSSES
+
+BEGIN BOARD
+A
+.
+B
+.
+.
+.
+END BOARD
+CD
+3, 0
+V
+
+BEGIN CROSSES
+
+1, 0
+|
+E
+
+5, 0
+|
+AE
+
+END CROSSES
+
+!: Prefix, right mid
+BEGIN BOARD
+.A...D
+END BOARD
+BC
+0, 2
+H
+
+BEGIN CROSSES
+0, 0
+-
+DE
+
+0, 4
+-
+E
+
+END CROSSES
+
+BEGIN BOARD
+.
+A
+.
+.
+.
+D
+END BOARD
+BC
+2, 0
+V
+
+BEGIN CROSSES
+0, 0
+|
+DE
+
+4, 0
+|
+E
+
+END CROSSES
+
+!: Prefix, both mid
+BEGIN BOARD
+A.B.D.E
+END BOARD
+C
+0, 3
+H
+
+BEGIN CROSSES
+
+0, 1
+-
+E
+
+0, 5
+-
+A
+
+END CROSSES
+
+BEGIN BOARD
+A
+.
+B
+.
+D
+.
+E
+END BOARD
+C
+3, 0
+V
+
+BEGIN CROSSES
+
+1, 0
+|
+E
+
+5, 0
+|
+A
+
+END CROSSES
+
+!: Suffix, left mid
