@@ -16,3 +16,9 @@ class Move(object):
 
     def sort_letters(self):
         self.positions.sort(key=lambda bp: bp.pos[self.horizontal])
+
+    def __eq__(self, other):
+        return self.positions == other.positions and self.horizontal == other.horizontal
+
+    def __hash__(self):
+        return hash((tuple(self.positions), self.horizontal))

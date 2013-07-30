@@ -1,6 +1,8 @@
 __author__ = 'Jacky'
 
 import unittest
+from copy import deepcopy
+
 from engine.move import Move
 
 
@@ -49,3 +51,22 @@ class TestMove(unittest.TestCase):
 
         self.assertEqual('a', m.positions[1].letter)
         self.assertEqual((1, 0), m.positions[1].pos)
+
+    def test_deepcopy(self):
+        m = Move()
+
+        m.add_letter('A', (0, 1))
+        m.add_letter('B', (0, 0))
+
+        m.drawn = ['A', 'B', 'C']
+
+        exp_pos = deepcopy(m.positions)
+        exp_drawn = deepcopy(m.drawn)
+
+        m2 = deepcopy(m)
+
+        m.drawn[2] = 'D'
+        m.positions[0] = ('D', (7, 7))
+
+        self.assertEqual(exp_pos, m2.positions)
+        self.assertEqual(exp_drawn, m2.drawn)
