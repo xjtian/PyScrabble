@@ -4,6 +4,7 @@ import unittest
 from copy import deepcopy
 
 from engine.move import Move
+from engine.board import BoardPosition
 
 
 class TestMove(unittest.TestCase):
@@ -70,3 +71,39 @@ class TestMove(unittest.TestCase):
 
         self.assertEqual(exp_pos, m2.positions)
         self.assertEqual(exp_drawn, m2.drawn)
+
+    def test_equality(self):
+        a = Move()
+        a.positions = ['A', {'a': [1, 2, 3]}]
+
+        b = Move()
+        b.positions = ['A', {'a': [1, 2, 3]}]
+
+        self.assert_(a == b)
+
+        b.horizontal = False
+        self.assert_(not a == b)
+
+        b.positions = ['A', {'b': [1, 2]}]
+        self.assert_(not a == b)
+
+        b.horizontal = True
+        self.assert_(not a == b)
+
+    def test_hash(self):
+        a = Move()
+        a.positions = ['A', 'B', 'C']
+
+        b = Move()
+        b.positions = ['A', 'B', 'C']
+
+        self.assert_(hash(a) == hash(b))
+
+        b.horizontal = False
+        self.assert_(not hash(a) == hash(b))
+
+        b.positions = ['A', 'B', 'D']
+        self.assert_(not hash(a) == hash(b))
+
+        b.horizontal = True
+        self.assert_(not hash(a) == hash(b))
