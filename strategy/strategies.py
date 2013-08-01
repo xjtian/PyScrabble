@@ -131,7 +131,11 @@ class StaticScoreStrategy(StrategyBase):
                 left_result = self.move_finder(pos - 1, deepcopy(move), deepcopy(rack), next_state)
 
                 # What if we switched directions?
-                right_result = self.move_finder(1, deepcopy(move), deepcopy(rack), next_state)
+                # Look for a delimiter first!
+                right_result = set()
+                if '|' in next_state.arcs:
+                    next_state = next_state.arcs['|']
+                    right_result = self.move_finder(1, deepcopy(move), deepcopy(rack), next_state)
 
                 # All moves possible from this branch of the decision tree
                 # is the union of all 3 of these sets - keep going left,
@@ -140,7 +144,6 @@ class StaticScoreStrategy(StrategyBase):
             else:
                 # Generating to the right, so changing to the left is not
                 # an option. Only option is to keep going right!
-                # TODO: look for a delimiter first!
                 right_result = self.move_finder(pos + 1, deepcopy(move), deepcopy(rack), next_state)
 
                 return right_result | cur_result
@@ -148,28 +151,56 @@ class StaticScoreStrategy(StrategyBase):
         else:
             # This position is empty, so let's see what we can play here
             # Can we end the move right here?
+            rack_set = set(rack)
+            if move.horizontal:
+                cross_set = self.game.vertical_crosses[x][y]
+            else:
+                cross_set = self.game.horizontal_crosses[x][y]
+
+            if cross_set is not None:
+                valid_letters = cross_set & state.letter_set & rack_set
+            else:
+                valid_letters = state.letter_set & rack_set
+
             cur_result = set()
-            for letter in rack:
-                if letter in state.letter_set:
+            for letter in valid_letters:
+                m = deepcopy(move)
+                m.add_letter(letter, (x, y))
+
+                cur_result.add(m)
+
+            if pos <= 0:
+                # Generating to the left, so let's try to keep moving left.
+
+                # If we put a letter down here, it must be in the current
+                # state's arcs, the perpendicular cross set if it exists,
+                # and the rack.
+                if cross_set is not None:
+                    valid_letters = set(state.arcs.keys()) & cross_set & rack_set
+                else:
+                    valid_letters = set(state.arcs.keys()) & rack_set
+
+                left_result = set()
+                for letter in valid_letters:
+                    assert(letter in rack and letter in state.arcs)     # Sanity check
+                    r = deepcopy(rack)
+                    r.remove(letter)
+
                     m = deepcopy(move)
                     m.add_letter(letter, (x, y))
 
-                    cur_result.add(m)
+                    left_result = self.move_finder(pos - 1, m, r, state.arcs[letter])
 
-            if pos <= 0:
-                # Generating to the left, so let's try to keep moving left
-                for i, letter in enumerate(rack):
-                    if letter in state.arcs:
-                        # Add this letter to the move, remove from rack and recurse
-                        r = deepcopy(rack)
-                        r.pop(i)
+                # Now let's try to switch directions and generate to the right.
+                # Look for the delimiter, go to that state, and set pos to 1.
+                right_result = set()
+                if '|' in state.arcs:
+                    next_state = state.arcs['|']
+                    m, r = deepcopy(move), deepcopy(rack)
+                    right_result = self.move_finder(1, m, r, next_state)
 
-                        m = deepcopy(move)
-                        m.add_letter(letter, (x, y))
+                return cur_result | left_result | right_result
 
-                        left_result = self.move_finder(pos - 1, m, r, state.arcs[letter])
-
-                # TODO: look for delimiter and start moving right
             else:
                 # Generating to the right, can only keep going
                 # TODO: implement this
