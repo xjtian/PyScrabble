@@ -87,6 +87,38 @@ class StaticScoreStrategy(StrategyBase):
         self.a_x = -1
         self.a_y = -1
 
+    def generate_moves(self):
+        self.find_anchors()
+
+        if self.game.history is None:
+            self.anchors.add((7, 7))
+
+        rack = self.game.players[self.game.current_turn].rack
+        gen_moves = set()
+        for pos in self.anchors:
+            self.a_x, self.a_y = pos
+            gen_moves |= self.move_finder(0, Move(), rack, self.game.gaddag.root)
+
+            m = Move()
+            m.horizontal = False
+            gen_moves |= self.move_finder(0, m, rack, self.game.gaddag.root)
+
+        for move in gen_moves:
+            move.sort_letters()
+            pos = move.positions[0].pos
+
+            letters = ''.join(map(lambda bp: bp.letter, move.positions))
+
+            success = self.game.set_candidate(letters, pos, move.horizontal)
+            assert success  # Sanity check
+
+            success = self.game.validate_candidate()
+            assert success  # Sanity check
+
+            self.game.remove_candidate()
+
+        return gen_moves
+
     def move_finder(self, pos, move, rack, state):
         """
         Recursive move finding algorithm that generates all valid plays
@@ -108,6 +140,7 @@ class StaticScoreStrategy(StrategyBase):
         @type pos: int
         @type rack: list
         """
+        # TODO: blanks
         x, y = self.__pos_arithmetic(self.a_x, self.a_y, pos, move.horizontal)
 
         cur_letter = self.game.board[x][y]
@@ -169,17 +202,16 @@ class StaticScoreStrategy(StrategyBase):
 
                 cur_result.add(m)
 
+            # If we put a letter down here, it must be in the current
+            # state's arcs, the perpendicular cross set if it exists,
+            # and the rack.
+            if cross_set is not None:
+                valid_letters = set(state.arcs.keys()) & cross_set & rack_set
+            else:
+                valid_letters = set(state.arcs.keys()) & rack_set
+
             if pos <= 0:
                 # Generating to the left, so let's try to keep moving left.
-
-                # If we put a letter down here, it must be in the current
-                # state's arcs, the perpendicular cross set if it exists,
-                # and the rack.
-                if cross_set is not None:
-                    valid_letters = set(state.arcs.keys()) & cross_set & rack_set
-                else:
-                    valid_letters = set(state.arcs.keys()) & rack_set
-
                 left_result = set()
                 for letter in valid_letters:
                     assert(letter in rack and letter in state.arcs)     # Sanity check
@@ -203,8 +235,18 @@ class StaticScoreStrategy(StrategyBase):
 
             else:
                 # Generating to the right, can only keep going
-                # TODO: implement this
-                pass
+                recursive_result = set()
+                for letter in valid_letters:
+                    assert(letter in rack and letter in state.arcs)     # Sanity check
+                    r = deepcopy(rack)
+                    r.remove(letter)
+
+                    m = deepcopy(move)
+                    m.add_letter(letter, (x, y))
+
+                    recursive_result = self.move_finder(pos + 1, m, r, state.arcs[letter])
+
+                return recursive_result | cur_result
 
     def __pos_arithmetic(self, x, y, value, horizontal):
         if horizontal:
