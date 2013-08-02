@@ -18,7 +18,8 @@ class Move(object):
         self.positions.sort(key=lambda bp: bp.pos[self.horizontal])
 
     def __eq__(self, other):
-        return self.positions == other.positions and self.horizontal == other.horizontal
+        return set(self.positions) == set(other.positions) and \
+            self.horizontal == other.horizontal
 
     def __hash__(self):
-        return hash((tuple(self.positions), self.horizontal))
+        return hash((tuple(set(self.positions)), self.horizontal))

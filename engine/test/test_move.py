@@ -74,17 +74,20 @@ class TestMove(unittest.TestCase):
 
     def test_equality(self):
         a = Move()
-        a.positions = ['A', {'a': [1, 2, 3]}]
+        a.positions = ['A', (1, 2, 3)]
 
         b = Move()
-        b.positions = ['A', {'a': [1, 2, 3]}]
+        b.positions = ['A', (1, 2, 3)]
 
+        self.assert_(a == b)
+
+        b.positions = [(1, 2, 3), 'A']
         self.assert_(a == b)
 
         b.horizontal = False
         self.assert_(not a == b)
 
-        b.positions = ['A', {'b': [1, 2]}]
+        b.positions = ['A', (1, 2)]
         self.assert_(not a == b)
 
         b.horizontal = True
@@ -107,3 +110,6 @@ class TestMove(unittest.TestCase):
 
         b.horizontal = True
         self.assert_(not hash(a) == hash(b))
+
+        b.positions = ['B', 'C', 'A']
+        self.assert_(hash(a) == hash(b))
