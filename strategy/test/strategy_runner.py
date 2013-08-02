@@ -12,7 +12,7 @@ strat = StaticScoreStrategy(game)
 columns = letters[:len(game.board[0])].upper()
 
 # Test using the fake wordlist and bag?
-TEST = True
+TEST = False
 
 
 def ignore_err(fn):
@@ -89,7 +89,7 @@ def get_move():
         game.pass_turn()
     elif choice == 4:
         moves = strat.generate_moves()
-        moves = sorted(moves, cmp=lambda x, y: cmp(x.score, y.score))
+        moves = sorted(moves, cmp=lambda x, y: cmp(x.score, y.score), reverse=True)
 
         for move in moves:
             print ''.join(map(lambda bp: bp.letter, move.positions))
@@ -108,7 +108,7 @@ def get_move():
         print '\n%s played %s at (%d, %d) for %d points\n' % (
             game.current_player_info()['name'], letters, pos[0], pos[1], game.candidate.score
         )
-        game.commit_candidate()
+        game.commit_candidate(crosses=True)
 
 
 def main():
