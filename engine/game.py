@@ -4,6 +4,7 @@ import copy
 import random
 
 from engine import letters, board, player, move
+from strategy.cross_sets import redo_crosses
 from lexicon import lexicon_set, gaddag
 from lexicon.settings import WORDLIST_PATH
 
@@ -92,6 +93,31 @@ class ScrabbleGame(object):
                 self.bag.pop(random.randint(0, len(self.bag) - 1)))
 
         self.game_started = True
+        return True
+
+    def set_candidate_move(self, move):
+        """
+        @type move: Move
+        """
+        if self.game_over:
+            return False
+
+        word = ''.join(map(lambda bp: bp.letter, move.positions))
+        from_rack = self.players[self.current_turn].valid_play(word)
+
+        if self.candidate is not None or not word:
+            return False
+        if not from_rack:
+            return False
+
+        for bp in move.positions:
+            x, y = bp.pos
+            if x < 0 or x >= len(self.board):
+                return False
+            if y < 0 or y >= len(self.board[x]):
+                return False
+
+        self.candidate = move
         return True
 
     def set_candidate(self, letters, pos, horizontal):
@@ -300,7 +326,7 @@ class ScrabbleGame(object):
         self.candidate = None
         return True
 
-    def commit_candidate(self):
+    def commit_candidate(self, crosses=False):
         """
         Commit the candidate move. This updates scores, draws new tiles for
         the player, ends the turn, and adds a new state to the game tree.
@@ -328,6 +354,9 @@ class ScrabbleGame(object):
 
         if not len(self.players[self.current_turn].rack) and not len(self.bag):
             self.game_over = True
+
+        if crosses:
+            redo_crosses(self.candidate, self.horizontal_crosses, self.vertical_crosses, self.board, self.gaddag)
 
         self.__commit_state(newstate)
         self.passes = 0
