@@ -141,7 +141,16 @@ class StaticScoreStrategy(StrategyBase):
         @type rack: list
         """
         # TODO: blanks
+
+        # Base cases
+        if len(rack) == 0:
+            return set()
+
         x, y = self.__pos_arithmetic(self.a_x, self.a_y, pos, move.horizontal)
+        if x < 0 or x >= len(self.game.board):
+            return set()
+        if y < 0 or y >= len(self.game.board[x]):
+            return set()
 
         cur_letter = self.game.board[x][y]
         if cur_letter not in board.empty_locations:
