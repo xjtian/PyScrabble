@@ -22,4 +22,4 @@ class Move(object):
             self.horizontal == other.horizontal
 
     def __hash__(self):
-        return hash((tuple(set(self.positions)), self.horizontal))
+        return hash((sum(map(hash, self.positions)), self.horizontal))
