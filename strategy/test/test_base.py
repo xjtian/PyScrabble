@@ -3,7 +3,7 @@ __author__ = 'Jacky'
 import unittest
 from copy import deepcopy
 
-from strategy.strategies import *
+from strategy.strategies import StrategyBase
 from engine.game import ScrabbleGame
 
 
