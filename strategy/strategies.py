@@ -1,6 +1,7 @@
 __author__ = 'Jacky'
 
 from copy import deepcopy
+import pdb
 
 from engine.game import ScrabbleGame
 from engine.move import Move
@@ -103,17 +104,19 @@ class StaticScoreStrategy(StrategyBase):
             m.horizontal = False
             gen_moves |= self.move_finder(0, m, rack, self.game.gaddag.root)
 
+        gen_moves = list(gen_moves)
         for move in gen_moves:
             move.sort_letters()
-            pos = move.positions[0].pos
 
-            letters = ''.join(map(lambda bp: bp.letter, move.positions))
-
-            success = self.game.set_candidate(letters, pos, move.horizontal)
-            assert success  # Sanity check
+            success = self.game.set_candidate_move(move)
+            if not success:
+                pdb.set_trace()
+                assert success  # Sanity check
 
             success = self.game.validate_candidate()
-            assert success  # Sanity check
+            if not success:
+                pdb.set_trace()
+                assert success  # Sanity check
 
             self.game.remove_candidate()
 
@@ -142,6 +145,10 @@ class StaticScoreStrategy(StrategyBase):
         """
         # TODO: blanks
 
+        # REMEMBER: when generating to the left, you MUST switch
+        # directions before you can make any conclusion about the
+        # validity of the current move.
+
         # Base cases
         if len(rack) == 0:
             return set()
@@ -157,15 +164,9 @@ class StaticScoreStrategy(StrategyBase):
             # This position is occupied. Jump to the next GADDAG state and
             # see if it's possible to have any words
 
-            # Can we end the move right here on this occupied spot?
-            if cur_letter in state.letter_set:
-                cur_result = {deepcopy(move)}
-            else:
-                cur_result = set()
-
             if cur_letter not in state.arcs:
                 # There are no possible extensions
-                return cur_result
+                return set()
 
             next_state = state.arcs[cur_letter]
             if pos <= 0:
@@ -182,38 +183,30 @@ class StaticScoreStrategy(StrategyBase):
                 # All moves possible from this branch of the decision tree
                 # is the union of all 3 of these sets - keep going left,
                 # start going right, and stop right here
-                return left_result | right_result | cur_result
+                return left_result | right_result
             else:
                 # Generating to the right, so changing to the left is not
                 # an option. Only option is to keep going right!
+                # Can we end the move right here on this occupied spot?
+                cur_result = set()
+                if cur_letter in state.letter_set:
+                    cur_result.add(deepcopy(move))
+
                 right_result = self.move_finder(pos + 1, deepcopy(move), deepcopy(rack), next_state)
 
                 return right_result | cur_result
 
         else:
             # This position is empty, so let's see what we can play here
-            # Can we end the move right here?
-            rack_set = set(rack)
+            # If we put a letter down here, it must be in the current
+            # state's arcs, the perpendicular cross set if it exists,
+            # and the rack.
             if move.horizontal:
                 cross_set = self.game.vertical_crosses[x][y]
             else:
                 cross_set = self.game.horizontal_crosses[x][y]
+            rack_set = set(rack)
 
-            if cross_set is not None:
-                valid_letters = cross_set & state.letter_set & rack_set
-            else:
-                valid_letters = state.letter_set & rack_set
-
-            cur_result = set()
-            for letter in valid_letters:
-                m = deepcopy(move)
-                m.add_letter(letter, (x, y))
-
-                cur_result.add(m)
-
-            # If we put a letter down here, it must be in the current
-            # state's arcs, the perpendicular cross set if it exists,
-            # and the rack.
             if cross_set is not None:
                 valid_letters = set(state.arcs.keys()) & cross_set & rack_set
             else:
@@ -230,7 +223,7 @@ class StaticScoreStrategy(StrategyBase):
                     m = deepcopy(move)
                     m.add_letter(letter, (x, y))
 
-                    left_result = self.move_finder(pos - 1, m, r, state.arcs[letter])
+                    left_result |= self.move_finder(pos - 1, m, r, state.arcs[letter])
 
                 # Now let's try to switch directions and generate to the right.
                 # Look for the delimiter, go to that state, and set pos to 1.
@@ -240,10 +233,24 @@ class StaticScoreStrategy(StrategyBase):
                     m, r = deepcopy(move), deepcopy(rack)
                     right_result = self.move_finder(1, m, r, next_state)
 
-                return cur_result | left_result | right_result
+                return left_result | right_result
 
             else:
-                # Generating to the right, can only keep going
+                # Generating to the right
+                # Can we end the move right here?
+                if cross_set is not None:
+                    valid_letters = cross_set & state.letter_set & rack_set
+                else:
+                    valid_letters = state.letter_set & rack_set
+
+                cur_result = set()
+                for letter in valid_letters:
+                    m = deepcopy(move)
+                    m.add_letter(letter, (x, y))
+
+                    cur_result.add(m)
+
+                # Can we keep going to the right?
                 recursive_result = set()
                 for letter in valid_letters:
                     assert(letter in rack and letter in state.arcs)     # Sanity check
@@ -253,7 +260,7 @@ class StaticScoreStrategy(StrategyBase):
                     m = deepcopy(move)
                     m.add_letter(letter, (x, y))
 
-                    recursive_result = self.move_finder(pos + 1, m, r, state.arcs[letter])
+                    recursive_result |= self.move_finder(pos + 1, m, r, state.arcs[letter])
 
                 return recursive_result | cur_result
 
