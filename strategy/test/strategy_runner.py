@@ -55,7 +55,7 @@ def start_game():
 def get_move():
     RE_INVALID = 'INVALID MOVE CANDIDATE\n'
 
-    print '\nMenu:\n1. Play a move\n2. Exchange tiles\n3. Pass'
+    print '\nMenu:\n1. Play a move\n2. Exchange tiles\n3. Pass\n4. Generate Move'
     choice = int(raw_input('Please Choose: '))
     print
 
@@ -89,10 +89,26 @@ def get_move():
         game.pass_turn()
     elif choice == 4:
         moves = strat.generate_moves()
+        moves = sorted(moves, cmp=lambda x, y: cmp(x.score, y.score))
 
-        print 'Movegen done'
         for move in moves:
-            print move
+            print ''.join(map(lambda bp: bp.letter, move.positions))
+            print move.score
+
+        m = moves[0]
+        m.sort_letters()
+        pos = m.positions[0].pos
+        letters = ''.join(map(lambda bp: bp.letter, m.positions))
+
+        success = game.set_candidate(letters, pos, m.horizontal)
+        assert success  # Sanity check
+        success = game.validate_candidate()
+        assert success  # Sanity check
+
+        print '\n%s played %s at (%d, %d) for %d points\n' % (
+            game.current_player_info()['name'], letters, pos[0], pos[1], game.candidate.score
+        )
+        game.commit_candidate()
 
 
 def main():
@@ -103,6 +119,10 @@ def main():
         game.bag = list('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'
                         'CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD'
                         'EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE')
+    else:
+        WORDLIST = './wordlists/OSPD4_stripped.txt'
+        game.lexicon_set = read_lexicon(WORDLIST)
+        game.gaddag = gaddag_from_file(WORDLIST)
 
     start_game()
     while not game.game_over:
