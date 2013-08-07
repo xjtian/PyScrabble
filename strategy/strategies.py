@@ -13,51 +13,45 @@ class StrategyBase(object):
         """
         Create a new static scrabble strategy for a specific game.
 
-        Parameters:
-            game:
-                The ScrabbleGame for the strategy.
-
-        @type game: ScrabbleGame
+        :param ScrabbleGame game: The ScrabbleGame for the strategy
         """
         self.game = game
 
-        # (int * int) set of which board positions are anchors
-        self.anchors = set()
-
-    def find_anchors(self):
+    def find_anchors(self, coord, horizontal):
         """
-        Computes the set of all anchor squares for the ScrabbleGame
-        associated with this strategy. Sets self.anchors.
+        Compute anchor squares for a given row or column.
 
-        Returns:
-            anchors:
-                (int * int) set of anchor positions. Same object
-                as self.anchors.
+        :param int coord: Row or column number to compute.
+        :param bool horizontal: True for a row, False for a column.
+
+        :returns: Anchor squares on the given row/column as a list of
+        integers as indexes of the anchors within the row/column.
         """
-        for row in xrange(0, len(self.game.board)):
-            for col in xrange(0, len(self.game.board[row])):
-                if self.game.board[row][col] not in board.empty_locations:
-                    # Occupied tile, so adjacent empties are anchors
+        if horizontal:
+            line = ''.join(self.game.board[coord])
+        else:
+            line = ''.join([row[coord] for row in self.game.board])
 
-                    # Check above position
-                    if row - 1 >= 0 and self.game.board[row - 1][col] in board.empty_locations:
-                        self.anchors.add((row - 1, col))
+        anchors = []
+        for i, letter in enumerate(line):
+            if i == 0:
+                continue
 
-                    # Check below position
-                    if row + 1 < len(self.game.board):
-                        if self.game.board[row + 1][col] in board.empty_locations:
-                            self.anchors.add((row + 1, col))
+            if letter not in board.empty_locations:
+                # Look left
+                left = line[i - 1]
+                if left in board.empty_locations:
+                    anchors.append(i - 1)
 
-                    # Check left position
-                    if col - 1 >= 0 and self.game.board[row][col - 1] in board.empty_locations:
-                        self.anchors.add((row, col - 1))
+        # Handle 2 special cases - totally empty line and full line
+        # except last position. Anchor is leftmost empty.
+        if len(anchors) == 0:
+            if line[0] in board.empty_locations:
+                anchors.append(0)
+            elif line[-1] in board.empty_locations:
+                anchors.append(len(line) - 1)
 
-                    # Check right position
-                    if col + 1 < len(self.game.board[row]):
-                        if self.game.board[row][col + 1] in board.empty_locations:
-                            self.anchors.add((row, col + 1))
-
-        return self.anchors
+        return anchors
 
     def generate_moves(self):
         """
