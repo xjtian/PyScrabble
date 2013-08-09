@@ -92,22 +92,17 @@ def get_move():
         moves = sorted(moves, cmp=lambda x, y: cmp(x.score, y.score), reverse=True)
 
         for move in moves:
-            print ''.join(map(lambda bp: bp.letter, move.positions))
-            print move.score
+            print '%s (%d, %d) %s : %d' % (move.word, move.x, move.y,
+                                           'H' if move.horizontal else 'V', move.score)
 
         m = moves[0]
-        m.sort_letters()
-        pos = m.positions[0].pos
-        letters = ''.join(map(lambda bp: bp.letter, m.positions))
+        game.set_candidate(m.word, (m.x, m.y), m.horizontal)
+        game.validate_candidate()
 
-        success = game.set_candidate(letters, pos, m.horizontal)
-        assert success  # Sanity check
-        success = game.validate_candidate()
-        assert success  # Sanity check
-
-        print '\n%s played %s at (%d, %d) for %d points\n' % (
-            game.current_player_info()['name'], letters, pos[0], pos[1], game.candidate.score
+        print '\n%s played at (%d, %d) for %d points\n' % (
+            m.word, m.x, m.y, game.candidate.score
         )
+
         game.commit_candidate(crosses=True)
 
 

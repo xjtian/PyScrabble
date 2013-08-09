@@ -94,7 +94,41 @@ class StaticScoreStrategy(StrategyBase):
         self.leftmost = -1
 
     def generate_moves(self):
+        def move_mapper(move):
+            check = self.game.set_candidate(move.word, (move.x, move.y), move.horizontal)
+            assert check    # sanity check
+
+            check = self.game.validate_candidate()
+            if not check:
+                print move
+                assert check    # sanity check
+
+            return move._replace(score=self.game.candidate.score)
+
         self.moves = set()
+        if self.game.history is None:
+            # Special case for first move
+            self.horizontal = True
+            self.row = self.game.board[7]
+            self.coord = 7
+
+            self.anchors = [7]
+            self.cross_sets = self.game.vertical_crosses[7]
+
+            rack = self.game.players[self.game.current_turn].rack
+            self.cur_anchor = 0
+            self.leftmost = 7
+
+            self.gen(0, '', rack, self.game.gaddag.root)
+
+            self.horizontal = False
+            self.row = [row[7] for row in self.game.board]
+            self.cross_sets = [row[7] for row in self.game.horizontal_crosses]
+            self.leftmost = 7
+
+            self.gen(0, '', rack, self.game.gaddag.root)
+
+            return map(move_mapper, self.moves)
 
         self.horizontal = True
         for i, row in enumerate(self.game.board):
@@ -119,7 +153,7 @@ class StaticScoreStrategy(StrategyBase):
             self.coord = i
 
             self.anchors = self.find_anchors(i, False)
-            self.cross_sets = self.game.horizontal_crosses[i]
+            self.cross_sets = [row[i] for row in self.game.horizontal_crosses]
 
             rack = self.game.players[self.game.current_turn].rack
 
@@ -128,15 +162,6 @@ class StaticScoreStrategy(StrategyBase):
                 self.leftmost = anchor
 
                 self.gen(0, '', rack, self.game.gaddag.root)
-
-        def move_mapper(move):
-            check = self.game.set_candidate(move.word, (move.x, move.y), move.horizontal)
-            assert check    # sanity check
-
-            check = self.game.validate_candidate()
-            assert check    # sanity check
-
-            return move._replace(score=self.game.candidate.score)
 
         return map(move_mapper, self.moves)
 
@@ -208,6 +233,7 @@ class StaticScoreStrategy(StrategyBase):
         """
         coord = self.anchors[self.cur_anchor] + pos
         if pos < 0 and coord < self.leftmost:
+            # TODO: this is broken
             self.leftmost = coord
 
         if pos <= 0:
@@ -220,16 +246,18 @@ class StaticScoreStrategy(StrategyBase):
                 self.record_play(word)
 
             if new_arc is not None:
-                if coord > 0:
-                    self.gen(pos - 1, word, rack, new_arc)
-
                 # Shift direction if possible
                 coord = self.anchors[self.cur_anchor] + 1
                 if '|' in new_arc.arcs and left_unoccupied and coord < len(self.row):
                     self.gen(1, word, rack, new_arc.arcs['|'])
+
+                if coord > 0:
+                    # Keep going left
+                    self.gen(pos - 1, word, rack, new_arc)
         else:
             # Moving right
-            word = '%s%s' % (word, letter)
+            if self.row[coord] in board.empty_locations:
+                word = '%s%s' % (word, letter)
             unoccupied = coord + 1 >= len(self.row) or self.row[coord + 1] in board.empty_locations
 
             if letter in old_arc.letter_set and unoccupied:
