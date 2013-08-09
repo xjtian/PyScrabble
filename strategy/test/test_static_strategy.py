@@ -47,3 +47,21 @@ class StaticScoreTest(unittest.TestCase):
 
         expected.add(MoveAlias(word='dcba', x=10, y=0, horizontal=False, score=0))
         self.assertEqual(expected, self.strategy.moves)
+
+    def test_algorithm(self):
+        # Try some empty rows (analogous to openings)
+        self.strategy.row = ['.', '.']
+        self.strategy.anchors = [0]
+        self.strategy.moves = set()
+        self.strategy.cross_sets = [None, None]
+        self.strategy.leftmost = 0
+        self.strategy.cur_anchor = 0
+        self.strategy.coord = 0
+
+        self.strategy.gen(0, '', ['A', 'B', 'A', 'B'], self.strategy.game.gaddag.root)
+
+        expected_words = ['AA', 'BB', 'AB', 'BA']
+        expected = set()
+        for word in expected_words:
+            expected.add(MoveAlias(word=word, x=0, y=0, horizontal=True, score=0))
+        self.assertEqual(expected, self.strategy.moves)

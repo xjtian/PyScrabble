@@ -9,7 +9,7 @@ from engine import board
 from lexicon.gaddag import GaddagState
 
 
-MoveAlias = namedtuple('MoveAlias', 'word, x, y, horizontal')
+MoveAlias = namedtuple('MoveAlias', 'word, x, y, horizontal, score')
 
 
 class StrategyBase(object):
@@ -129,19 +129,30 @@ class StaticScoreStrategy(StrategyBase):
 
                 self.gen(0, '', rack, self.game.gaddag.root)
 
+        def move_mapper(move):
+            check = self.game.set_candidate(move.word, (move.x, move.y), move.horizontal)
+            assert check    # sanity check
+
+            check = self.game.validate_candidate()
+            assert check    # sanity check
+
+            return move._replace(score=self.game.candidate.score)
+
+        return map(move_mapper, self.moves)
+
     def record_play(self, word):
         """
-        Add a move candidate to the set.
+        Record a move candidate.
 
-        :param str word:
-        :param int coord:
+        :param str word: The letters of the move to record.
+        :param int coord: The leftmost coordinate of the move.
         """
         if self.horizontal:
             self.moves.add(MoveAlias(word=word, x=self.coord,
-                                     y=self.leftmost, horizontal=self.horizontal))
+                                     y=self.leftmost, horizontal=self.horizontal, score=0))
         else:
             self.moves.add(MoveAlias(word=word, x=self.leftmost,
-                                     y=self.coord, horizontal=self.horizontal))
+                                     y=self.coord, horizontal=self.horizontal, score=0))
 
     def gen(self, pos, word, rack, state):
         """
@@ -178,7 +189,7 @@ class StaticScoreStrategy(StrategyBase):
                 if cross_set is None:
                     cross_set = set('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
 
-                for letter in valid_letters:
+                for letter in cross_set:
                     new_rack = deepcopy(rack)
                     new_rack.remove(' ')
                     self.go_on(pos, letter, word, new_rack, state.arcs.get(letter), state)
@@ -212,10 +223,10 @@ class StaticScoreStrategy(StrategyBase):
                 if coord > 0:
                     self.gen(pos - 1, word, rack, new_arc)
 
-                    # Shift direction if possible
-                    coord = self.anchors[self.cur_anchor] + 1
-                    if '|' in new_arc.arcs and left_unoccupied and coord < len(self.row):
-                        self.gen(1, word, rack, new_arc.arcs['|'])
+                # Shift direction if possible
+                coord = self.anchors[self.cur_anchor] + 1
+                if '|' in new_arc.arcs and left_unoccupied and coord < len(self.row):
+                    self.gen(1, word, rack, new_arc.arcs['|'])
         else:
             # Moving right
             word = '%s%s' % (word, letter)
