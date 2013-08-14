@@ -91,19 +91,23 @@ class StaticScoreStrategy(StrategyBase):
         self.row = []
         self.anchors = []
         self.cross_sets = []
-        self.leftmost = -1
 
     def generate_moves(self):
         def move_mapper(move):
             check = self.game.set_candidate(move.word, (move.x, move.y), move.horizontal)
-            assert check    # sanity check
+            if not check:
+                print move
+                assert check    # sanity check
 
             check = self.game.validate_candidate()
             if not check:
                 print move
                 assert check    # sanity check
 
-            return move._replace(score=self.game.candidate.score)
+            score = self.game.candidate.score
+            self.game.remove_candidate()
+
+            return move._replace(score=score)
 
         self.moves = set()
         if self.game.history is None:
@@ -117,16 +121,14 @@ class StaticScoreStrategy(StrategyBase):
 
             rack = self.game.players[self.game.current_turn].rack
             self.cur_anchor = 0
-            self.leftmost = 7
 
-            self.gen(0, '', rack, self.game.gaddag.root)
+            self.gen(7, 0, '', rack, self.game.gaddag.root)
 
             self.horizontal = False
             self.row = [row[7] for row in self.game.board]
             self.cross_sets = [row[7] for row in self.game.horizontal_crosses]
-            self.leftmost = 7
 
-            self.gen(0, '', rack, self.game.gaddag.root)
+            self.gen(7, 0, '', rack, self.game.gaddag.root)
 
             return map(move_mapper, self.moves)
 
@@ -142,9 +144,8 @@ class StaticScoreStrategy(StrategyBase):
 
             for j, anchor in enumerate(self.anchors):
                 self.cur_anchor = j
-                self.leftmost = anchor
 
-                self.gen(0, '', rack, self.game.gaddag.root)
+                self.gen(anchor, 0, '', rack, self.game.gaddag.root)
 
         self.horizontal = False
         columns = [[row[i] for row in self.game.board] for i in xrange(0, len(self.game.board[0]))]
@@ -159,13 +160,12 @@ class StaticScoreStrategy(StrategyBase):
 
             for j, anchor in enumerate(self.anchors):
                 self.cur_anchor = j
-                self.leftmost = anchor
 
-                self.gen(0, '', rack, self.game.gaddag.root)
+                self.gen(anchor, 0, '', rack, self.game.gaddag.root)
 
         return map(move_mapper, self.moves)
 
-    def record_play(self, word):
+    def record_play(self, leftmost, word):
         """
         Record a move candidate.
 
@@ -174,12 +174,12 @@ class StaticScoreStrategy(StrategyBase):
         """
         if self.horizontal:
             self.moves.add(MoveAlias(word=word, x=self.coord,
-                                     y=self.leftmost, horizontal=self.horizontal, score=0))
+                                     y=leftmost, horizontal=self.horizontal, score=0))
         else:
-            self.moves.add(MoveAlias(word=word, x=self.leftmost,
+            self.moves.add(MoveAlias(word=word, x=leftmost,
                                      y=self.coord, horizontal=self.horizontal, score=0))
 
-    def gen(self, pos, word, rack, state):
+    def gen(self, leftmost, pos, word, rack, state):
         """
         :param pos:
         :param word:
@@ -191,7 +191,7 @@ class StaticScoreStrategy(StrategyBase):
         cur_letter = self.row[coord]
 
         if cur_letter not in board.empty_locations:
-            self.go_on(pos, cur_letter, word, rack, state.arcs.get(cur_letter), state)
+            self.go_on(leftmost, pos, cur_letter, word, rack, state.arcs.get(cur_letter), state)
         elif len(rack) > 0:
             # Because of the way the algorithm is implemented, the letters
             # we can put on this square is just the intersection of the
@@ -207,7 +207,7 @@ class StaticScoreStrategy(StrategyBase):
                 new_rack = deepcopy(rack)
                 new_rack.remove(letter)
 
-                self.go_on(pos, letter, word, new_rack, state.arcs.get(letter), state)
+                self.go_on(leftmost, pos, letter, word, new_rack, state.arcs.get(letter), state)
 
             if ' ' in rack:
                 # A blank tile can be any letter in the orthogonal cross set
@@ -217,9 +217,9 @@ class StaticScoreStrategy(StrategyBase):
                 for letter in cross_set:
                     new_rack = deepcopy(rack)
                     new_rack.remove(' ')
-                    self.go_on(pos, letter, word, new_rack, state.arcs.get(letter), state)
+                    self.go_on(leftmost, pos, letter, word, new_rack, state.arcs.get(letter), state)
 
-    def go_on(self, pos, letter, word, rack, new_arc, old_arc):
+    def go_on(self, leftmost, pos, letter, word, rack, new_arc, old_arc):
         """
         :param pos:
         :param str letter:
@@ -232,28 +232,28 @@ class StaticScoreStrategy(StrategyBase):
         :type old_arc: GaddagState
         """
         coord = self.anchors[self.cur_anchor] + pos
-        if pos < 0 and coord < self.leftmost:
-            # TODO: this is broken
-            self.leftmost = coord
 
         if pos <= 0:
             if self.row[coord] in board.empty_locations:
                 word = '%s%s' % (letter, word)
 
+                if pos < 0 and coord < leftmost:
+                    leftmost = coord
+
             left_unoccupied = coord - 1 < 0 or self.row[coord - 1] in board.empty_locations
             if letter in old_arc.letter_set and left_unoccupied:
                 # TODO: remove redundancy with overruning previous anchor
-                self.record_play(word)
+                self.record_play(leftmost, word)
 
             if new_arc is not None:
                 # Shift direction if possible
                 coord = self.anchors[self.cur_anchor] + 1
                 if '|' in new_arc.arcs and left_unoccupied and coord < len(self.row):
-                    self.gen(1, word, rack, new_arc.arcs['|'])
+                    self.gen(leftmost, 1, word, rack, new_arc.arcs['|'])
 
                 if coord > 0:
                     # Keep going left
-                    self.gen(pos - 1, word, rack, new_arc)
+                    self.gen(leftmost, pos - 1, word, rack, new_arc)
         else:
             # Moving right
             if self.row[coord] in board.empty_locations:
@@ -261,6 +261,6 @@ class StaticScoreStrategy(StrategyBase):
             unoccupied = coord + 1 >= len(self.row) or self.row[coord + 1] in board.empty_locations
 
             if letter in old_arc.letter_set and unoccupied:
-                self.record_play(word)
+                self.record_play(leftmost, word)
             if new_arc is not None and coord + 1 < len(self.row):
-                self.gen(pos + 1, word, rack, new_arc)
+                self.gen(leftmost, pos + 1, word, rack, new_arc)
