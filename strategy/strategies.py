@@ -110,6 +110,7 @@ class StaticScoreStrategy(StrategyBase):
     """
     Strategy to maximize the score every turn, no lookahead.
     """
+
     def __init__(self, game):
         super(StaticScoreStrategy, self).__init__(game)
 
@@ -128,22 +129,10 @@ class StaticScoreStrategy(StrategyBase):
     def generate_moves(self):
         def move_mapper(move):
             check = self.game.set_candidate(move.word, (move.x, move.y), move.horizontal)
-            if not check:
-                print move
-                if move.horizontal:
-                    print self.find_anchors(move.x, True)
-                else:
-                    print self.find_anchors(move.y, False)
-                assert check    # sanity check
+            assert check    # sanity check
 
             check = self.game.validate_candidate()
-            if not check:
-                print move
-                if move.horizontal:
-                    print self.find_anchors(move.x, True)
-                else:
-                    print self.find_anchors(move.y, False)
-                assert check    # sanity check
+            assert check    # sanity check
 
             score = self.game.candidate.score
             self.game.remove_candidate()
@@ -214,11 +203,13 @@ class StaticScoreStrategy(StrategyBase):
         :param int coord: The leftmost coordinate of the move.
         """
         if self.horizontal:
-            self.moves.add(MoveAlias(word=word, x=self.coord,
-                                     y=leftmost, horizontal=self.horizontal, score=0))
+            move = MoveAlias(word=word, x=self.coord,
+                             y=leftmost, horizontal=self.horizontal, score=0)
+            self.moves.add(move)
         else:
-            self.moves.add(MoveAlias(word=word, x=leftmost,
-                                     y=self.coord, horizontal=self.horizontal, score=0))
+            move = MoveAlias(word=word, x=leftmost,
+                             y=self.coord, horizontal=self.horizontal, score=0)
+            self.moves.add(move)
 
     def gen(self, leftmost, pos, word, rack, state):
         """
@@ -229,7 +220,7 @@ class StaticScoreStrategy(StrategyBase):
         :type state: GaddagState
         """
         coord = self.anchors[self.cur_anchor] + pos
-        cur_letter = self.row[coord]
+        cur_letter = self.row[coord].upper()
 
         if cur_letter not in board.empty_locations:
             self.go_on(leftmost, pos, cur_letter, word, rack, state.arcs.get(cur_letter), state)
@@ -280,18 +271,24 @@ class StaticScoreStrategy(StrategyBase):
             if self.row[coord] in board.empty_locations:
                 word = '%s%s' % (letter, word)
 
-                if pos < 0 and coord < leftmost:
+                if coord < leftmost:
                     leftmost = coord
 
             left_unoccupied = coord - 1 < 0 or self.row[coord - 1] in board.empty_locations
             if letter in old_arc.letter_set and left_unoccupied:
                 # TODO: remove redundancy with overruning previous anchor
-                self.record_play(leftmost, word)
+                # To commit a move here, we must make sure that this
+                # prefix-only move doesn't hook onto a suffix that
+                # at this point hasn't been checked for validity
+                r_coord = self.anchors[self.cur_anchor] + 1
+                if r_coord < len(self.row) - 1:
+                    if self.row[r_coord] in board.empty_locations:
+                        self.record_play(leftmost, word)
 
             if new_arc is not None:
                 # Shift direction if possible
-                coord = self.anchors[self.cur_anchor] + 1
-                if '|' in new_arc.arcs and left_unoccupied and coord < len(self.row):
+                r_coord = self.anchors[self.cur_anchor] + 1
+                if '|' in new_arc.arcs and left_unoccupied and r_coord < len(self.row):
                     self.gen(leftmost, 1, word, rack, new_arc.arcs['|'])
 
                 if coord > 0:

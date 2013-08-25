@@ -69,7 +69,7 @@ def get_move():
             if game.validate_candidate():
                 print '\n%s played %s at (%d, %d) for %d points\n' % (
                     game.current_player_info()['name'], letters, x, y, game.candidate.score)
-                game.commit_candidate()
+                game.commit_candidate(crosses=True)
             else:
                 print RE_INVALID
                 game.remove_candidate()
@@ -91,9 +91,9 @@ def get_move():
         moves = strat.generate_moves()
         moves = sorted(moves, cmp=lambda x, y: cmp(x.score, y.score), reverse=True)
 
-        for move in moves:
-            print '%s (%d, %d) %s : %d' % (move.word, move.x, move.y,
-                                           'H' if move.horizontal else 'V', move.score)
+        # for move in moves:
+        #     print '%s (%d, %d) %s : %d' % (move.word, move.x, move.y,
+        #                                    'H' if move.horizontal else 'V', move.score)
 
         m = moves[0]
         game.set_candidate(m.word, (m.x, m.y), m.horizontal)
