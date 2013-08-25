@@ -40,24 +40,57 @@ class StrategyBase(object):
         else:
             line = ''.join([row[coord] for row in self.game.board])
 
+        def next_occupied(j):
+            j += 1
+            while j < len(line):
+                letter = line[j]
+                if letter not in board.empty_locations:
+                    return j
+                j += 1
+
+            return j
+
+        def is_anchor(j):
+            if line[j] not in board.empty_locations:
+                return False
+
+            # Look left/up, if possible
+            if j > 0:
+                if line[j - 1] not in board.empty_locations:
+                    return True
+
+            # Look right/down, if possible
+            if j < len(line) - 1:
+                if line[j + 1] not in board.empty_locations:
+                    return True
+
+            # Look up/left, if possible
+            if horizontal and coord > 0:
+                if self.game.board[coord - 1][j] not in board.empty_locations:
+                    return True
+            elif not horizontal and coord > 0:
+                if self.game.board[j][coord - 1] not in board.empty_locations:
+                    return True
+
+            # Look down/right, if possible
+            if horizontal and coord < len(self.game.board) - 1:
+                if self.game.board[coord + 1][j] not in board.empty_locations:
+                    return True
+            elif not horizontal and coord < len(self.game.board[j]) - 1:
+                if self.game.board[j][coord + 1] not in board.empty_locations:
+                    return True
+
+            return False
+
         anchors = []
-        for i, letter in enumerate(line):
-            if i == 0:
-                continue
+        i = 0
 
-            if letter not in board.empty_locations:
-                # Look left
-                left = line[i - 1]
-                if left in board.empty_locations:
-                    anchors.append(i - 1)
+        while i < len(line):
+            if is_anchor(i):
+                anchors.append(i)
+                i = next_occupied(i)
 
-        # Handle 2 special cases - totally empty line and full line
-        # except last position. Anchor is leftmost empty.
-        if len(anchors) == 0:
-            if line[0] in board.empty_locations:
-                anchors.append(0)
-            elif line[-1] in board.empty_locations:
-                anchors.append(len(line) - 1)
+            i += 1
 
         return anchors
 
@@ -97,11 +130,19 @@ class StaticScoreStrategy(StrategyBase):
             check = self.game.set_candidate(move.word, (move.x, move.y), move.horizontal)
             if not check:
                 print move
+                if move.horizontal:
+                    print self.find_anchors(move.x, True)
+                else:
+                    print self.find_anchors(move.y, False)
                 assert check    # sanity check
 
             check = self.game.validate_candidate()
             if not check:
                 print move
+                if move.horizontal:
+                    print self.find_anchors(move.x, True)
+                else:
+                    print self.find_anchors(move.y, False)
                 assert check    # sanity check
 
             score = self.game.candidate.score
@@ -232,6 +273,8 @@ class StaticScoreStrategy(StrategyBase):
         :type old_arc: GaddagState
         """
         coord = self.anchors[self.cur_anchor] + pos
+        if coord < 0:
+            return
 
         if pos <= 0:
             if self.row[coord] in board.empty_locations:
