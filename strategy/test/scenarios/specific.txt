@@ -70,3 +70,23 @@ ABDE
 E
 
 END CROSSES
+
+!: Try a cross set for something with a lowercase letter (blank played)
+BEGIN BOARD
+......
+END BOARD
+ABcD
+0, 1
+H
+
+BEGIN CROSSES
+
+0, 0
+-
+E
+
+0, 5
+-
+E
+
+END CROSSES

@@ -45,14 +45,14 @@ def redo_crosses(move, h_cross, v_cross, s_board, gaddag):
     if move.horizontal:
         for y in xrange(fy, ly + 1):
             if s_board[fx][y] in board.empty_locations:
-                move_word += move.positions[i].letter
+                move_word += move.positions[i].letter.upper()
                 i += 1
             else:
                 move_word += s_board[fx][y]
     else:
         for x in xrange(fx, lx + 1):
             if s_board[x][fy] in board.empty_locations:
-                move_word += move.positions[i].letter
+                move_word += move.positions[i].letter.upper()
                 i += 1
             else:
                 move_word += s_board[x][fy]
@@ -101,7 +101,7 @@ def redo_crosses(move, h_cross, v_cross, s_board, gaddag):
         left_mid = left is not None
         right_mid = right is not None
 
-        word = prefix + bp.letter + suffix
+        word = prefix + bp.letter.upper() + suffix
 
         if left_mid and not right_mid:
             _, right = gaddag.cross_sets(word)
@@ -157,7 +157,7 @@ def mid_cross(bp, prefix, suffix, horizontal, s_board, gaddag):
     x, y = bp.pos
     left_cross, right_cross = None, None
 
-    word = prefix + bp.letter + suffix
+    word = prefix + bp.letter.upper() + suffix
 
     # Check coord - prefix length - 2 to determine if middle cross on left/above
     # Check coord + suffix length + 2 to determine if middle cross on right/below

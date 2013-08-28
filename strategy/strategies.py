@@ -129,10 +129,12 @@ class StaticScoreStrategy(StrategyBase):
     def generate_moves(self):
         def move_mapper(move):
             check = self.game.set_candidate(move.word, (move.x, move.y), move.horizontal)
-            assert check    # sanity check
+            if not check:   # This line is just for hooking breakpoints to
+                assert check    # sanity check
 
             check = self.game.validate_candidate()
-            assert check    # sanity check
+            if not check:
+                assert check    # sanity check
 
             score = self.game.candidate.score
             self.game.remove_candidate()
