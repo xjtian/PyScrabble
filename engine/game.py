@@ -95,31 +95,6 @@ class ScrabbleGame(object):
         self.game_started = True
         return True
 
-    def set_candidate_move(self, move):
-        """
-        @type move: Move
-        """
-        if self.game_over:
-            return False
-
-        word = ''.join(map(lambda bp: bp.letter, move.positions))
-        from_rack = self.players[self.current_turn].valid_play(word)
-
-        if self.candidate is not None or not word:
-            return False
-        if not from_rack:
-            return False
-
-        for bp in move.positions:
-            x, y = bp.pos
-            if x < 0 or x >= len(self.board):
-                return False
-            if y < 0 or y >= len(self.board[x]):
-                return False
-
-        self.candidate = move
-        return True
-
     def set_candidate(self, letters, pos, horizontal):
         """
         Shortcut for setting the candidate move. Specify the letters (in order)
