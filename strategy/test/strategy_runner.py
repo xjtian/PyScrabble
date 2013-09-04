@@ -1,6 +1,8 @@
 __author__ = 'jacky'
 
+import pdb
 from string import letters
+
 from engine.game import ScrabbleGame
 from lexicon.lexicon_set import read_lexicon
 from lexicon.gaddag import gaddag_from_file
@@ -55,7 +57,7 @@ def start_game():
 def get_move():
     RE_INVALID = 'INVALID MOVE CANDIDATE\n'
 
-    print '\nMenu:\n1. Play a move\n2. Exchange tiles\n3. Pass\n4. Generate Move'
+    print '\nMenu:\n1. Play a move\n2. Exchange tiles\n3. Pass\n4. Generate Move\n5. Drop into PDB'
     choice = int(raw_input('Please Choose: '))
     print
 
@@ -104,6 +106,10 @@ def get_move():
         )
 
         game.commit_candidate(crosses=True)
+    elif choice == 5:
+        pdb.set_trace()
+    else:
+        raise ValueError('')
 
 
 def main():
