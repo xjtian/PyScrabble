@@ -97,15 +97,18 @@ def get_move():
         #     print '%s (%d, %d) %s : %d' % (move.word, move.x, move.y,
         #                                    'H' if move.horizontal else 'V', move.score)
 
-        m = moves[0]
-        game.set_candidate(m.word, (m.x, m.y), m.horizontal)
-        game.validate_candidate()
+        if len(moves) > 0:
+            m = moves[0]
+            game.set_candidate(m.word, (m.x, m.y), m.horizontal)
+            game.validate_candidate()
 
-        print '\n%s played at (%d, %d) for %d points\n' % (
-            m.word, m.x, m.y, game.candidate.score
-        )
+            print '\n%s played at (%d, %d) for %d points\n' % (
+                m.word, m.x, m.y, game.candidate.score
+            )
 
-        game.commit_candidate(crosses=True)
+            game.commit_candidate(crosses=True)
+        else:
+            game.pass_turn()
     elif choice == 5:
         pdb.set_trace()
     else:
