@@ -35,6 +35,7 @@ class StrategyBase(object):
         :returns: Anchor squares on the given row/column as a list of
         integers as indexes of the anchors within the row/column.
         """
+        # TODO: BROKEN. Imagine empty row below a filled row.
         if horizontal:
             line = ''.join(self.game.board[coord])
         else:
@@ -278,7 +279,6 @@ class StaticScoreStrategy(StrategyBase):
 
             left_unoccupied = coord - 1 < 0 or self.row[coord - 1] in board.empty_locations
             if letter in old_arc.letter_set and left_unoccupied:
-                # TODO: remove redundancy with overruning previous anchor
                 # To commit a move here, we must make sure that this
                 # prefix-only move doesn't hook onto a suffix that
                 # at this point hasn't been checked for validity
@@ -294,8 +294,15 @@ class StaticScoreStrategy(StrategyBase):
                     self.gen(leftmost, 1, word, rack, new_arc.arcs['|'])
 
                 if coord > 0:
-                    # Keep going left
-                    self.gen(leftmost, pos - 1, word, rack, new_arc)
+                    # Keep going left, only if we don't overrun previous
+                    # anchor (avoid redundancy)
+                    if self.cur_anchor > 0:
+                        prev_anchor = self.anchors[self.cur_anchor - 1]
+                    else:
+                        prev_anchor = -1
+
+                    if coord - 1 > prev_anchor:
+                        self.gen(leftmost, pos - 1, word, rack, new_arc)
         else:
             # Moving right
             if self.row[coord] in board.empty_locations:
