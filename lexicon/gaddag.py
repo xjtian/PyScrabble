@@ -115,7 +115,7 @@ class Gaddag(object):
                 cross-set for the word and right is the right cross-set.
         """
         cur_state = self.root
-        for letter in word[::-1]:
+        for letter in word.upper()[::-1]:
             if not letter in cur_state.arcs:
                 return set(), set()
             cur_state = cur_state.arcs[letter]
@@ -143,7 +143,7 @@ class Gaddag(object):
         # Look for REV(word) in the GADDAG - easiest way to find mid cross
         # Start by traversing reverse through the suffix
         cur_state = self.root
-        for letter in suffix[::-1]:
+        for letter in suffix.upper()[::-1]:
             if not letter in cur_state.arcs:
                 return set()
             cur_state = cur_state.arcs[letter]
@@ -151,7 +151,7 @@ class Gaddag(object):
         # Now for each arc exiting this state, check if the prefix is on it
         letter_set = set()
         for k, v in cur_state.arcs.iteritems():
-            for letter in prefix[:0:-1]:
+            for letter in prefix.upper()[:0:-1]:
                 if not letter in v.arcs:
                     break
                 v = v.arcs[letter]

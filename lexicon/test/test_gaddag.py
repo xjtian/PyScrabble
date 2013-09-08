@@ -89,6 +89,20 @@ class TestGaddag(unittest.TestCase):
 
         self.assertEqual((set(), set()), self.gaddag.cross_sets('ZZZZ'))
 
+        # Test for lowercase (blank)
+        self.word = 'ABcDEFG'
+        subword = self.word[1:]
+        left, right = self.gaddag.cross_sets(subword)
+        self.assertEqual({self.word[0]}, left)
+        self.assertEqual(set(), right)
+
+        subword = self.word[:-1]
+        left, right = self.gaddag.cross_sets(subword)
+        self.assertEqual(set(), left)
+        self.assertEqual({self.word[-1]}, right)
+
+        self.assertEqual((set(), set()), self.gaddag.cross_sets('ZZZZ'))
+
     def test_mid_set(self):
         self.gaddag.add_word(self.word)
 
