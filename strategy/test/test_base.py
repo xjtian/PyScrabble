@@ -31,8 +31,8 @@ class TestStrategyBase(unittest.TestCase):
             list('AAAAA')
         ]
 
-        self.assertEqual([1, 4], self.strategy.find_anchors(0, True))
-        self.assertEqual([0], self.strategy.find_anchors(1, True))
+        self.assertEqual([1, 2, 4], self.strategy.find_anchors(0, True))
+        self.assertEqual([0, 1, 2, 3], self.strategy.find_anchors(1, True))
         self.assertEqual([4], self.strategy.find_anchors(2, True))
         self.assertEqual([2], self.strategy.find_anchors(3, True))
         self.assertEqual([0, 2, 4], self.strategy.find_anchors(4, True))
@@ -46,8 +46,8 @@ class TestStrategyBase(unittest.TestCase):
             list('...A.A')
         ]
 
-        self.assertEqual([1, 4], self.strategy.find_anchors(0, False))
-        self.assertEqual([0], self.strategy.find_anchors(1, False))
+        self.assertEqual([1, 2, 4], self.strategy.find_anchors(0, False))
+        self.assertEqual([0, 1, 2, 3], self.strategy.find_anchors(1, False))
         self.assertEqual([4], self.strategy.find_anchors(2, False))
         self.assertEqual([2], self.strategy.find_anchors(3, False))
         self.assertEqual([0, 2, 4], self.strategy.find_anchors(4, False))

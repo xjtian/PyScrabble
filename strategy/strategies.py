@@ -41,16 +41,6 @@ class StrategyBase(object):
         else:
             line = ''.join([row[coord] for row in self.game.board])
 
-        def next_occupied(j):
-            j += 1
-            while j < len(line):
-                letter = line[j]
-                if letter not in board.empty_locations:
-                    return j
-                j += 1
-
-            return j
-
         def is_anchor(j):
             if line[j] not in board.empty_locations:
                 return False
@@ -83,15 +73,7 @@ class StrategyBase(object):
 
             return False
 
-        anchors = []
-        i = 0
-
-        while i < len(line):
-            if is_anchor(i):
-                anchors.append(i)
-                i = next_occupied(i)
-
-            i += 1
+        anchors = [i for i in xrange(0, len(line)) if is_anchor(i)]
 
         return anchors
 
