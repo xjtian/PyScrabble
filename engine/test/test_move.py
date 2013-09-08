@@ -1,7 +1,10 @@
 __author__ = 'Jacky'
 
 import unittest
+from copy import deepcopy
+
 from engine.move import Move
+from engine.board import BoardPosition
 
 
 class TestMove(unittest.TestCase):
@@ -49,3 +52,64 @@ class TestMove(unittest.TestCase):
 
         self.assertEqual('a', m.positions[1].letter)
         self.assertEqual((1, 0), m.positions[1].pos)
+
+    def test_deepcopy(self):
+        m = Move()
+
+        m.add_letter('A', (0, 1))
+        m.add_letter('B', (0, 0))
+
+        m.drawn = ['A', 'B', 'C']
+
+        exp_pos = deepcopy(m.positions)
+        exp_drawn = deepcopy(m.drawn)
+
+        m2 = deepcopy(m)
+
+        m.drawn[2] = 'D'
+        m.positions[0] = ('D', (7, 7))
+
+        self.assertEqual(exp_pos, m2.positions)
+        self.assertEqual(exp_drawn, m2.drawn)
+
+    def test_equality(self):
+        a = Move()
+        a.positions = ['A', (1, 2, 3)]
+
+        b = Move()
+        b.positions = ['A', (1, 2, 3)]
+
+        self.assert_(a == b)
+
+        b.positions = [(1, 2, 3), 'A']
+        self.assert_(a == b)
+
+        b.horizontal = False
+        self.assert_(not a == b)
+
+        b.positions = ['A', (1, 2)]
+        self.assert_(not a == b)
+
+        b.horizontal = True
+        self.assert_(not a == b)
+
+    def test_hash(self):
+        a = Move()
+        a.positions = ['A', 'B', 'C']
+
+        b = Move()
+        b.positions = ['A', 'B', 'C']
+
+        self.assert_(hash(a) == hash(b))
+
+        b.horizontal = False
+        self.assert_(not hash(a) == hash(b))
+
+        b.positions = ['A', 'B', 'D']
+        self.assert_(not hash(a) == hash(b))
+
+        b.horizontal = True
+        self.assert_(not hash(a) == hash(b))
+
+        b.positions = ['B', 'C', 'A']
+        self.assert_(hash(a) == hash(b))

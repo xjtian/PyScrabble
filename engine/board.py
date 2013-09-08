@@ -29,6 +29,12 @@ class BoardPosition(object):
         self.pos = pos
         self.letter = letter
 
+    def __eq__(self, other):
+        return self.pos == other.pos and self.letter == other.letter
+
+    def __hash__(self):
+        return hash((self.pos, self.letter))
+
 
 def get_prefix(board, x, y, horizontal):
     """

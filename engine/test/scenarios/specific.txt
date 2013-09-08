@@ -22,3 +22,26 @@ RASING
 H
 1
 30
+
+BEGIN BOARD
+#..2...#...2..D
+.@...3...3...@E
+..@...2.2.PEC.W
+2..@...2..INLAY
+....@.....@.A..
+.3...3...GATS3.
+..2...2.FAMES..
+#..2...GADID..#
+..ZOO.KoR..I2..
+.XI..HIRE3.O.3C
+JUN.E.....NUT.U
+O.g@Q..2..ASH.R
+T.A.U.TIE.V.A.F
+.INNAGE.OBVERSE
+#.I2L.LINEY2M.W
+END BOARD
+PED
+10, 6
+H
+1
+28

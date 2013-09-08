@@ -16,3 +16,10 @@ class Move(object):
 
     def sort_letters(self):
         self.positions.sort(key=lambda bp: bp.pos[self.horizontal])
+
+    def __eq__(self, other):
+        return set(self.positions) == set(other.positions) and \
+            self.horizontal == other.horizontal
+
+    def __hash__(self):
+        return hash((sum(map(hash, self.positions)), self.horizontal))

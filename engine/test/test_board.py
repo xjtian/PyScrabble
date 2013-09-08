@@ -100,3 +100,26 @@ class TestPrefixSuffix(unittest.TestCase):
         self.assertEqual('BB', get_suffix(board, 2, 2, True))
         self.assertEqual('BB', get_suffix(board, 2, 2, False))
 
+
+class TestBoardPosition(unittest.TestCase):
+    def test_equality(self):
+        a = BoardPosition('A', (0, 1))
+        b = BoardPosition('A', (0, 1))
+
+        self.assert_(a == b)
+        self.assert_(a == a)
+        self.assert_(b == b)
+
+        b = BoardPosition('B', (0, 0))
+
+        self.assert_(not a == b)
+
+    def test_hash(self):
+        a = BoardPosition('A', (0, 1))
+        b = BoardPosition('A', (0, 1))
+
+        self.assert_(hash(a) == hash(b))
+
+        b = BoardPosition('B', (0, 0))
+
+        self.assert_(hash(a) != hash(b))
